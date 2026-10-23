@@ -1,0 +1,21 @@
+# Gradle and builds
+.gradle/
+build/
+.kotlin/
+local.properties
+
+# Signing: the release keystore never enters the repo
+*.jks
+*.keystore
+keystore.properties
+
+# IDEs and OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Android
+captures/
+*.apk
+*.aab
