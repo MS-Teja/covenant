@@ -55,6 +55,12 @@ class Schedule(
     fun nextDayStartAfter(instant: Instant): Instant =
         ZonedDateTime.of(dayOf(instant).plusDays(1), DAY_START, zone).toInstant()
 
+    /** Resolved runs that haven't ended by [instant], up to a week ahead, earliest first. */
+    fun upcomingFrom(instant: Instant): List<Occurrence> {
+        val firstDay = dayOf(instant).minusDays(1)
+        return resolved((0L..8L).map { firstDay.plusDays(it) }).filter { it.end.toInstant().isAfter(instant) }
+    }
+
     /** Resolved runs for the day of [instant] and its neighbours. */
     fun occurrencesAround(instant: Instant): List<Occurrence> {
         val day = dayOf(instant)

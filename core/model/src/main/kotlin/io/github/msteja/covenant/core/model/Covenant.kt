@@ -52,6 +52,7 @@ data class Covenant(
     val weekendDays: Set<DayOfWeek> = setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY),
     val essentials: Set<AppId> = emptySet(),
     val ringThrough: Set<AppId> = emptySet(),
+    val weeklyEmergencyPass: Boolean = false,
 )
 
 const val MINUTES_PER_DAY = 24 * 60
