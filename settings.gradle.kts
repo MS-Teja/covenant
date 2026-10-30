@@ -19,3 +19,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "covenant"
+
+include(":core:model", ":core:rules")

@@ -45,15 +45,17 @@ Ink Tide is the v0.1 theme. Every screen, editors included, belongs to the same 
 | Feeling | Calm and monastic: quiet, slow, lots of empty space. Nothing asks for attention |
 | Palette | Blue-black ink `#0A0E14` background, text `#D8DEE6`. A tide-blue accent appears only in ripples |
 | Type | Literata (variable, optical sizes) for everything, with tabular figures for times. Fallback: Source Serif 4. Fonts are bundled, never downloaded |
-| Home | Centred, large app names. Top: "Thursday 23" over "Work · until 4:00". Essentials in a smaller row. Bottom: "Evening at 4:00". No counts or durations |
-| Today's page | One swipe from home. Each block is a band; clean bands lie still and slips ripple |
+| Home | Reads like a book page. The date is a small-caps running head, the current block is the chapter title with "until 4:00" in italics, and its apps sit centred in large type. Essentials follow as a small-caps footnote under a tide-wave ornament, and "Evening at 4:00" closes the page. No counts or durations |
+| Atmosphere | Each block lays a soft tide wash in its hue along the bottom of every screen, drifting slowly, so each block feels like a different phone. A faint paper grain and a lit top edge sit over the ink |
+| Today's page | One swipe from home. The day is one continuous ink ribbon with hours in the margin. Hours already lived are inked and the rest of the day stays faint, with "now" where the ink has reached. Clean blocks lie still, slips ripple, and one written line sums up the day |
 | Block tints | Hue follows the hour: dawn blue, pale midday, dusk amber, night indigo. Tone shifts too, so the page still reads in grayscale |
 | Motion | Rich and fluid but unhurried: springs without overshoot, ink shaders, parallax, textured haptics. Honours Android's Remove animations setting |
 | Opening pause | Ink bloom: a drop spreads from the centre over 3 seconds with "30 min" and "left in Evening", then the page lifts off the app |
 | Voice | Factual and terse: "Instagram opens at 4:00 pm." |
 | Search | Allowed apps only. Outside apps don't exist until their block |
-| Seal | A calm summary of your covenant, then hold for 3 seconds. An ink seal stamps down with a deep haptic thud |
-| App icon | A seal mark, with a monochrome layer for themed icons |
+| Seal | Your covenant written out as a short vow ("On weekdays, Work runs 8 to 4…"), then hold for 3 seconds while the seal soaks with ink. It stamps down, slightly askew, with a deep haptic thud |
+| App icon | A seal mark: two rings, one tide line and a point for now. It has a monochrome layer for themed icons, and small sizes keep both rings with heavier strokes |
+| Design frames | [Ink Tide frames](https://claude.ai/artifact/VhFyCPca3LiTX9QEDzWrEy) (private canvas) |
 | Controls | Words only. No icons anywhere in Covenant's own UI |
 | Garden (v0.2) | Plants drawn in code, different every day. Clean blocks branch and bloom; slips droop until morning |
 
