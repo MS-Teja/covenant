@@ -53,6 +53,8 @@ data class Covenant(
     val essentials: Set<AppId> = emptySet(),
     val ringThrough: Set<AppId> = emptySet(),
     val weeklyEmergencyPass: Boolean = false,
+    /** How long a looser change waits (R22). Lengthening it applies at once; shortening waits (R26). */
+    val cooldown: Duration = Duration.ofHours(72),
 )
 
 const val MINUTES_PER_DAY = 24 * 60

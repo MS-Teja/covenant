@@ -27,7 +27,7 @@ data class Occurrence(
 /** Turns a [Covenant] into real block runs in a time zone. Wall-clock times win across DST changes. */
 class Schedule(
     private val covenant: Covenant,
-    private val zone: ZoneId,
+    val zone: ZoneId,
 ) {
     /** The day [instant] belongs to: its date, or the day before when it's earlier than 4 am. */
     fun dayOf(instant: Instant): LocalDate {
