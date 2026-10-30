@@ -1,5 +1,10 @@
+@file:UseSerializers(LocalTimeSerializer::class, DurationSerializer::class)
+
 package io.github.msteja.covenant.core.model
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalTime
@@ -8,13 +13,19 @@ import java.time.LocalTime
 val DAY_START: LocalTime = LocalTime.of(4, 0)
 
 /** An installed app, identified by its package name. */
+@Serializable
 @JvmInline
 value class AppId(val packageName: String)
 
 /** How long an app may be on screen inside one block (R11). */
+@Serializable
 sealed interface Limit {
+    @Serializable
+    @SerialName("unlimited")
     data object Unlimited : Limit
 
+    @Serializable
+    @SerialName("minutes")
     data class Minutes(val minutes: Int) : Limit {
         init {
             require(minutes in 1..MINUTES_PER_DAY) { "A limit must be 1–$MINUTES_PER_DAY minutes, was $minutes" }
@@ -26,6 +37,7 @@ sealed interface Limit {
  * A named time range with its own apps, time limits and grayscale setting.
  * A block whose [end] is at or before its [start] crosses midnight.
  */
+@Serializable
 data class Block(
     val id: String,
     val name: String,
@@ -43,9 +55,11 @@ data class Block(
 }
 
 /** All 24 hours of a day split into blocks. Time outside every block is essentials-only (R1). */
+@Serializable
 data class Timeline(val blocks: List<Block>)
 
 /** Everything you promised: both timelines, essentials and the ring-through list. */
+@Serializable
 data class Covenant(
     val weekday: Timeline,
     val weekend: Timeline,

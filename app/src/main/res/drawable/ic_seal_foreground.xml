@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The seal mark on the 108dp adaptive-icon grid, inside the 66dp safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <path android:strokeColor="#FFD8DEE6" android:strokeWidth="2.7"
+        android:pathData="M54,27 a27,27 0 1,1 0,54 a27,27 0 1,1 0,-54" />
+    <path android:strokeColor="#FFD8DEE6" android:strokeWidth="1.8"
+        android:pathData="M54,32.7 a21.3,21.3 0 1,1 0,42.6 a21.3,21.3 0 1,1 0,-42.6" />
+    <path android:strokeColor="#FFD8DEE6" android:strokeWidth="3.6" android:strokeLineCap="round"
+        android:pathData="M39.6,57 C43.2,52.8 47.4,52.8 51,55.8 S58.8,60 62.4,55.8 S66.6,52.8 68.4,54" />
+    <path android:fillColor="#FFD8DEE6"
+        android:pathData="M54,36.3 a2.1,2.1 0 1,1 0,4.2 a2.1,2.1 0 1,1 0,-4.2" />
+</vector>

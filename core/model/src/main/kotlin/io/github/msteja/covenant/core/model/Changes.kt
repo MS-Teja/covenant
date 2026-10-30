@@ -1,9 +1,14 @@
+@file:UseSerializers(InstantSerializer::class)
+
 package io.github.msteja.covenant.core.model
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 import java.time.Duration
 import java.time.Instant
 
 /** A looser change waiting out its cooldown (R24). [proposed] is the whole covenant as it will be. */
+@Serializable
 data class PendingChange(
     val id: String,
     val proposed: Covenant,
@@ -15,6 +20,7 @@ data class PendingChange(
  * The covenant in force, the changes still waiting, and when you sealed it.
  * Before the seal, and during calibration week, every change applies at once (R25).
  */
+@Serializable
 data class Commitments(
     val current: Covenant,
     val pending: List<PendingChange> = emptyList(),
@@ -28,6 +34,7 @@ data class Commitments(
 val CALIBRATION: Duration = Duration.ofDays(7)
 
 /** A notification from an outside app, kept until [releaseAt], when its app's next block starts (R17). */
+@Serializable
 data class HeldNotification(
     val app: AppId,
     val title: String,
