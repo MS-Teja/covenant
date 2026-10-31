@@ -57,20 +57,20 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Duration
 
-/** R47: swipe up to search. Only apps you can open right now are found. */
+/** R47: swipe up to search. Only apps you can open right now are found, tools included. */
 @Composable
 fun SearchScreen(view: HomeView, chapter: String, onOpen: (InstalledApp) -> Unit, onClose: () -> Unit) {
     BackHandler(onBack = onClose)
     var query by remember { mutableStateOf("") }
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { focus.requestFocus() }
-    val candidates = (view.apps + view.essentials).distinctBy { it.id }
+    val candidates = view.searchable.distinctBy { it.id to it.user }
     val matches = if (query.isBlank()) emptyList() else candidates.filter { it.label.contains(query.trim(), ignoreCase = true) }
         .sortedBy { if (it.label.startsWith(query.trim(), ignoreCase = true)) 0 else 1 }
 
     Column(Modifier.fillMaxSize().systemBarsPadding().imePadding().padding(top = 80.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         RunningHead("Search")
-        BasicText("$chapter and essentials", style = Type.text(13.sp, Ink.dim, italic = true))
+        BasicText("everything open in $chapter", style = Type.text(13.sp, Ink.dim, italic = true))
         BasicTextField(
             value = query,
             onValueChange = { query = it },

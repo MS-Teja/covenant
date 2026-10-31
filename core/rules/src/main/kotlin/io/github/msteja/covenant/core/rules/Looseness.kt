@@ -18,6 +18,8 @@ private const val MINUTES_PER_WEEK = 7 * 24 * 60
 fun isNoLooser(proposed: Covenant, current: Covenant): Boolean {
     if (!current.essentials.containsAll(proposed.essentials)) return false
     if (!current.ringThrough.containsAll(proposed.ringThrough)) return false
+    // An app that stops pulling you in becomes a tool and opens any time.
+    if (!proposed.tempting.containsAll(current.tempting)) return false
     if (proposed.passesPerWeek > current.passesPerWeek) return false
     if (proposed.weekendDays != current.weekendDays) return false
     if (proposed.cooldown < current.cooldown) return false
@@ -35,16 +37,18 @@ private fun timelinesNoLooser(proposed: Covenant, current: Covenant): Boolean {
         val oldRun = oldAt[minute]
         // Turning grayscale off is looser.
         if (oldRun?.block?.grayscale == true && newRun?.block?.grayscale != true) return false
-        // An app open in the new rules must be open in the old ones at the same minute.
+        // An app the old rules held to blocks must not open at a minute they kept it closed.
+        // Apps newly marked as pulling you in were open any time before, so any window is stricter.
         for (app in newRun?.block?.apps?.keys.orEmpty()) {
-            if (app !in current.essentials && oldRun?.block?.apps?.containsKey(app) != true) return false
+            if (app !in current.tempting || app in current.essentials) continue
+            if (oldRun?.block?.apps?.containsKey(app) != true) return false
         }
     }
 
     // Budgets: inside each old run, the new rules may not offer an app more minutes than the old limit.
     for (oldRun in oldRuns) {
         for ((app, oldLimit) in oldRun.block.apps) {
-            if (oldLimit !is Limit.Minutes || app in proposed.essentials) continue
+            if (oldLimit !is Limit.Minutes || app in proposed.essentials || app !in current.tempting) continue
             val offered = newRuns.sumOf { newRun -> offeredInside(app, newRun, oldRun) }
             if (offered > oldLimit.minutes) return false
         }

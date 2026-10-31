@@ -352,6 +352,7 @@ fun describeChange(old: Covenant, new: Covenant): List<String> {
     val lines = mutableListOf<String>()
     fun label(id: AppId) = Graph.catalog.label(id)
     (new.essentials - old.essentials).forEach { lines += "${label(it)} becomes essential." }
+    (old.tempting - new.tempting).forEach { lines += "${label(it)} opens any time." }
     (new.ringThrough - old.ringThrough).forEach { lines += "${label(it)} calls ring through." }
     if (new.passesPerWeek > old.passesPerWeek) lines += "Passes rise to ${new.passesPerWeek} a week."
     if (new.weekendDays != old.weekendDays) lines += "Weekend days change."

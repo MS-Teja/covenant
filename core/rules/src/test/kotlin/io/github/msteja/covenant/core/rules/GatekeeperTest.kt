@@ -25,6 +25,7 @@ private val gmail = AppId("com.google.android.gm")
 private val instagram = AppId("com.instagram.android")
 private val phone = AppId("com.android.dialer")
 private val uber = AppId("com.ubercab")
+private val photos = AppId("com.google.android.apps.photos")
 
 private val day = Timeline(
     listOf(
@@ -33,7 +34,7 @@ private val day = Timeline(
         Block("night", "Night", LocalTime.of(22, 0), LocalTime.of(8, 0), grayscale = true),
     ),
 )
-private val covenant = Covenant(weekday = day, weekend = day, essentials = setOf(phone))
+private val covenant = Covenant(weekday = day, weekend = day, essentials = setOf(phone), tempting = setOf(gmail, instagram, uber))
 private val schedule = Schedule(covenant, ZONE)
 private val exits = Exits(covenant, schedule)
 private val gate = Gatekeeper(covenant, schedule, exits)
@@ -56,7 +57,13 @@ class GatekeeperTest {
     }
 
     @Test
-    fun `R8 an app in no block is blocked with nowhere to open`() {
+    fun `R6 an app nobody marked as tempting opens any time, with no pause`() {
+        assertEquals(Access.Open, decide(photos, "2026-10-23T11:20"))
+        assertEquals(Access.Open, decide(photos, "2026-10-23T23:00"))
+    }
+
+    @Test
+    fun `R6 a tempting app in no block is blocked with nowhere to open`() {
         assertEquals(Access.Blocked(Access.Reason.NOT_IN_BLOCK, null), decide(uber, "2026-10-23T13:00"))
     }
 
@@ -100,6 +107,12 @@ class GatekeeperTest {
         assertEquals(Access.Reason.QUIET, access.reason)
         assertEquals(t("2026-10-24T08:00"), access.opensAt?.toInstant())
         assertEquals(Access.Open, decide(phone, "2026-10-23T10:01", quiet))
+    }
+
+    @Test
+    fun `R27 Quiet holds tools too, until it ends`() {
+        val quiet = exits.quiet(Activity(), t("2026-10-23T10:00"))!!
+        assertEquals(Access.Blocked(Access.Reason.QUIET, t("2026-10-23T16:00").atZone(ZONE)), decide(photos, "2026-10-23T10:01", quiet))
     }
 
     @Test

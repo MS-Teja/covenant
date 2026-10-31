@@ -63,6 +63,8 @@ data class HomeView(
     val until: String?,
     val apps: List<InstalledApp>,
     val essentials: List<InstalledApp>,
+    /** Everything that opens right now, tools included: what search finds (R47). */
+    val searchable: List<InstalledApp>,
     val next: String?,
     val unguarded: Boolean,
 )
@@ -98,7 +100,7 @@ fun homeView(context: Context, state: AppState, installed: List<InstalledApp>, n
 
     val head = "${day.format(weekday)} · ${day.dayOfMonth} ${day.month.name.lowercase().replaceFirstChar { it.uppercase() }}"
     val unguarded = state.commitments.sealedAt == null || !guardConnected(context)
-    return HomeView(head, chapter, until, shown, essentialApps, next, unguarded)
+    return HomeView(head, chapter, until, shown, essentialApps, installed.filter(::allowed), next, unguarded)
 }
 
 /** Both services Covenant needs are switched on (R39). */

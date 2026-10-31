@@ -32,7 +32,7 @@ private fun covenantWith(evening: Block, extra: List<Block> = emptyList()): Cove
     val work = Block("work", "Work", LocalTime.of(8, 0), LocalTime.of(16, 0), mapOf(slack to Limit.Unlimited))
     val night = Block("night", "Night", LocalTime.of(22, 0), LocalTime.of(8, 0), grayscale = true)
     val day = Timeline(listOf(work, evening, night) + extra)
-    return Covenant(weekday = day, weekend = day)
+    return Covenant(weekday = day, weekend = day, tempting = setOf(insta, slack))
 }
 
 private fun evening(start: Int = 16, end: Int = 22, minutes: Int = 30) =
@@ -78,6 +78,18 @@ class LoosenessTest {
     @Test
     fun `R26 lengthening the cooldown is stricter`() {
         assertTrue(isNoLooser(base.copy(cooldown = Duration.ofHours(96)), base))
+    }
+
+    @Test
+    fun `R6 marking an app as tempting is stricter, unmarking it is looser`() {
+        assertTrue(isNoLooser(base.copy(tempting = base.tempting + whatsapp), base))
+        assertFalse(isNoLooser(base.copy(tempting = base.tempting - insta), base))
+    }
+
+    @Test
+    fun `R6 any window for a newly tempting app is stricter than none`() {
+        val withWhatsapp = covenantWith(evening().copy(apps = mapOf(insta to Limit.Minutes(30), whatsapp to Limit.Unlimited)))
+        assertTrue(isNoLooser(withWhatsapp.copy(tempting = withWhatsapp.tempting + whatsapp), base))
     }
 
     @Test
@@ -146,7 +158,8 @@ class ChangeRulesTest {
 }
 
 class NotificationRouteTest {
-    private val effective = EffectiveRules(sealed.copy(current = base.copy(ringThrough = setOf(whatsapp))), Z)
+    private val effective = EffectiveRules(sealed.copy(current = base.copy(ringThrough = setOf(whatsapp), tempting = base.tempting + whatsapp)), Z)
+    private val photos = AppId("com.google.android.apps.photos")
     private val none = emptyMap<UsageKey, Duration>()
 
     @Test
@@ -155,7 +168,12 @@ class NotificationRouteTest {
     }
 
     @Test
-    fun `R18 an app in no block is dismissed`() {
+    fun `R17 a tool's notifications always arrive`() {
+        assertEquals(Route.Deliver, effective.route(photos, false, Moment(at("2026-10-23T23:00")), Activity(), none))
+    }
+
+    @Test
+    fun `R18 a tempting app in no block is dismissed`() {
         assertEquals(Route.Dismiss, effective.route(whatsapp, false, Moment(at("2026-10-23T11:20")), Activity(), none))
     }
 

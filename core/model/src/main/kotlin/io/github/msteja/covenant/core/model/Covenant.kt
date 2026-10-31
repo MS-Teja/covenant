@@ -58,13 +58,18 @@ data class Block(
 @Serializable
 data class Timeline(val blocks: List<Block>)
 
-/** Everything you promised: both timelines, essentials and the ring-through list. */
+/** Everything you promised: both timelines, essentials, the apps that pull you in and the ring-through list. */
 @Serializable
 data class Covenant(
     val weekday: Timeline,
     val weekend: Timeline,
     val weekendDays: Set<DayOfWeek> = setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY),
     val essentials: Set<AppId> = emptySet(),
+    /**
+     * Apps that pull you in. Only these are held to blocks; every other app is a tool and opens any
+     * time from search. In a block, a tool is only pinned to home (R6).
+     */
+    val tempting: Set<AppId> = emptySet(),
     val ringThrough: Set<AppId> = emptySet(),
     /** Passes a week, from 0 to [MAX_PASSES_PER_WEEK]. Raising it waits the cooldown (R55). */
     val passesPerWeek: Int = 1,

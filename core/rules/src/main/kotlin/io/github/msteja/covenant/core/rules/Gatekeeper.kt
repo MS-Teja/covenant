@@ -19,7 +19,7 @@ data class Moment(
 )
 
 sealed interface Access {
-    /** Opens with no pause: essentials, unlimited block apps and passes. */
+    /** Opens with no pause: essentials, tools, unlimited block apps and passes. */
     data object Open : Access
 
     /** Opens after the pause, with this much screen time left in [block] (R12). */
@@ -48,9 +48,13 @@ class Gatekeeper(
         if (moment.systemAllowlisted || moment.inCallOrNavigating) return Access.Open
         if (app in covenant.essentials) return Access.Open
         if (exits.quietAt(activity, now)) {
-            return Access.Blocked(Access.Reason.QUIET, nextOpening(app, activity.quietUntil!!))
+            val until = activity.quietUntil!!
+            val opens = if (app in covenant.tempting) nextOpening(app, until) else until.atZone(schedule.zone)
+            return Access.Blocked(Access.Reason.QUIET, opens)
         }
         if (exits.passRunningFor(app, activity, now) != null) return Access.Open
+        // Apps nobody marked as pulling them in are tools: they open any time, with no pause (R6).
+        if (app !in covenant.tempting) return Access.Open
 
         val running = schedule.activeAt(now)
         val limit = running?.block?.apps?.get(app)
