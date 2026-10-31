@@ -78,14 +78,13 @@ fun dueSummaries(held: List<HeldNotification>, now: Instant): Map<AppId, List<He
     held.filter { !it.releaseAt.isAfter(now) }.sortedBy { it.postedAt }.groupBy { it.app }
 
 /**
- * R40: a clean run had no borrow, no emergency exit and no unguarded time.
+ * R40: a clean run had no pass and no unguarded time.
  * Hitting a time limit doesn't count against it.
  */
 fun isClean(run: Occurrence, activity: Activity, unguarded: List<ClosedRange<Instant>>): Boolean {
     val start = run.start.toInstant()
     val end = run.end.toInstant()
     fun overlaps(from: Instant, until: Instant) = from.isBefore(end) && until.isAfter(start)
-    return activity.borrows.none { overlaps(it.startsAt, it.endsAt) } &&
-        activity.emergencyPasses.none { overlaps(it.startsAt, it.endsAt) } &&
+    return activity.passes.none { overlaps(it.startsAt, it.endsAt) } &&
         unguarded.none { overlaps(it.start, it.endInclusive) }
 }

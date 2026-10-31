@@ -141,7 +141,7 @@ class MainActivity : ComponentActivity() {
                             "settings" -> Screen.Settings
                             "quiet" -> {
                                 Graph.store.launchUpdate { s ->
-                                    Graph.rules(s.commitments).exits.quietNow(s.activity, Graph.now())?.let { s.copy(activity = it) } ?: s
+                                    Graph.rules(s.commitments).exits.quiet(s.activity, Graph.now())?.let { s.copy(activity = it) } ?: s
                                 }
                                 Screen.Home
                             }

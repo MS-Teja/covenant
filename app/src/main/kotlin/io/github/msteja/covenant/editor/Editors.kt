@@ -353,7 +353,7 @@ fun describeChange(old: Covenant, new: Covenant): List<String> {
     fun label(id: AppId) = Graph.catalog.label(id)
     (new.essentials - old.essentials).forEach { lines += "${label(it)} becomes essential." }
     (new.ringThrough - old.ringThrough).forEach { lines += "${label(it)} calls ring through." }
-    if (new.weeklyEmergencyPass && !old.weeklyEmergencyPass) lines += "The weekly emergency pass turns on."
+    if (new.passesPerWeek > old.passesPerWeek) lines += "Passes rise to ${new.passesPerWeek} a week."
     if (new.weekendDays != old.weekendDays) lines += "Weekend days change."
     if (new.cooldown < old.cooldown) lines += "The cooldown shortens to ${new.cooldown.toHours()} hours."
     for ((name, before, after) in listOf(Triple("Weekdays", old.weekday, new.weekday), Triple("Weekends", old.weekend, new.weekend))) {

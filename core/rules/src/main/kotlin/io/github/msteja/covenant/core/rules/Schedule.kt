@@ -51,7 +51,7 @@ class Schedule(
             .minOrNull()
     }
 
-    /** The next 4 am after [instant], when the page turns and borrows reset. */
+    /** The next 4 am after [instant], when the page turns. */
     fun nextDayStartAfter(instant: Instant): Instant =
         ZonedDateTime.of(dayOf(instant).plusDays(1), DAY_START, zone).toInstant()
 

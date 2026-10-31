@@ -39,9 +39,7 @@ object Scheduler {
             state.held.minOfOrNull { it.releaseAt },
             state.commitments.pending.minOfOrNull { it.landsAt },
             activity.quietUntil,
-            activity.focus?.endsAt,
-        ).plus(activity.borrows.flatMap { listOf(it.startsAt, it.endsAt) })
-            .plus(activity.emergencyPasses.flatMap { listOf(it.startsAt, it.endsAt) })
+        ).plus(activity.passes.flatMap { listOf(it.startsAt, it.endsAt) })
             .filter { it.isAfter(now) }
             .minOrNull() ?: return
 

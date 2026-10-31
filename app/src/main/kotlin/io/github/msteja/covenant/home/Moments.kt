@@ -41,8 +41,7 @@ import androidx.compose.ui.unit.sp
 import io.github.msteja.covenant.Graph
 import io.github.msteja.covenant.core.model.AppId
 import io.github.msteja.covenant.core.rules.Access
-import io.github.msteja.covenant.core.rules.BorrowResult
-import io.github.msteja.covenant.core.rules.EmergencyResult
+import io.github.msteja.covenant.core.rules.PassResult
 import io.github.msteja.covenant.core.rules.startsAt
 import io.github.msteja.covenant.data.AppState
 import io.github.msteja.covenant.data.InstalledApp
@@ -107,7 +106,7 @@ fun SearchScreen(view: HomeView, chapter: String, onOpen: (InstalledApp) -> Unit
     }
 }
 
-/** The blocked screen: why, when it opens, and the ways out (R29, R31). */
+/** The blocked screen: why, when it opens, and the pass (R55). */
 @Composable
 fun BlockedScreen(app: AppId, state: AppState, onOpened: () -> Unit, onBack: () -> Unit) {
     BackHandler(onBack = onBack)
@@ -128,6 +127,8 @@ fun BlockedScreen(app: AppId, state: AppState, onOpened: () -> Unit, onBack: () 
     }
     val (headline, note) = when (access) {
         is Access.Hidden -> "$label's time is used up." to (access.until?.let { "It opens again at ${fullTime(it, now)}." } ?: "")
+        is Access.Blocked if access.reason == Access.Reason.QUIET ->
+            "Quiet until ${fullTime(state.activity.quietUntil!!.atZone(Graph.zone), now)}." to "Only essentials open until then."
         is Access.Blocked -> {
             val opens = access.opensAt
             val home = opens?.let { at -> rules.schedule.activeAt(at.toInstant())?.block?.name }
@@ -138,8 +139,9 @@ fun BlockedScreen(app: AppId, state: AppState, onOpened: () -> Unit, onBack: () 
     }
 
     val exits = rules.exits
-    val borrowsLeft = exits.borrowsLeft(state.activity, now)
-    val emergencyAt = exits.emergencyAvailableAt(state.activity)
+    val passesLeft = exits.passesLeft(state.activity, now)
+    val nextPass = exits.nextPassAt(state.activity, now)
+    val quiet = exits.quietAt(state.activity, now)
 
     Column(Modifier.fillMaxSize().systemBarsPadding().padding(horizontal = 32.dp, vertical = 28.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         // A used-up app still belongs to this block; only a blocked one is outside it.
@@ -153,40 +155,29 @@ fun BlockedScreen(app: AppId, state: AppState, onOpened: () -> Unit, onBack: () 
         if (wait != null) {
             BasicText("Opens in 0:${"%02d".format(wait.seconds.coerceAtLeast(0))}", style = Type.text(20.sp, weight = 380).copy(fontFeatureSettings = Type.TABULAR))
             BasicText("A minute to be sure.", Modifier.padding(top = 4.dp, bottom = 20.dp), style = Type.text(14.sp, Ink.mist, italic = true))
-        } else {
+        } else if (!quiet && state.commitments.current.passesPerWeek > 0) {
             WordButton(
-                "Borrow ten minutes",
+                "Use a pass",
                 Modifier.fillMaxWidth(),
-                note = if (borrowsLeft > 0) "$borrowsLeft left today · after a 1-minute wait" else "none left today · back at 4 am",
-                enabled = borrowsLeft > 0,
+                note = when {
+                    passesLeft > 0 -> "$label for 10 minutes · $passesLeft left this week"
+                    nextPass != null -> "next pass ${fullTime(nextPass.atZone(Graph.zone), now)}"
+                    else -> "none left this week"
+                },
+                enabled = passesLeft > 0,
             ) {
-                val result = exits.requestBorrow(app, state.activity, Graph.now())
-                if (result is BorrowResult.Granted) {
-                    Graph.store.launchUpdate { it.copy(activity = it.activity.copy(borrows = it.activity.borrows + result.borrow)) }
+                val result = exits.requestPass(app, state.activity, Graph.now())
+                if (result is PassResult.Granted) {
+                    Graph.store.launchUpdate { it.copy(activity = it.activity.copy(passes = it.activity.passes + result.pass)) }
                     scope.launch {
                         while (true) {
-                            val left = Duration.between(Graph.now(), result.borrow.startsAt)
+                            val left = Duration.between(Graph.now(), result.pass.startsAt)
                             waiting = left
                             if (left.isNegative || left.isZero) break
                             delay(250)
                         }
                         Graph.catalog.launch(app)
                         onOpened()
-                    }
-                }
-            }
-            if (state.commitments.current.weeklyEmergencyPass) {
-                val available = emergencyAt == null || !emergencyAt.isAfter(now)
-                WordButton(
-                    "Emergency pass",
-                    Modifier.fillMaxWidth(),
-                    note = if (available) "everything for 30 minutes · after a 10-minute wait"
-                    else "back ${fullTime(emergencyAt!!.atZone(Graph.zone), now)}",
-                    enabled = available,
-                ) {
-                    val result = exits.requestEmergency(state.activity, Graph.now())
-                    if (result is EmergencyResult.Granted) {
-                        Graph.store.launchUpdate { it.copy(activity = it.activity.copy(emergencyPasses = it.activity.emergencyPasses + result.pass)) }
                     }
                 }
             }

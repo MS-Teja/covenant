@@ -9,7 +9,7 @@ import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalTime
 
-/** The day starts at 4 am for timelines, today's page, borrows and stats (R4). */
+/** The day starts at 4 am for timelines, today's page and stats (R4). */
 val DAY_START: LocalTime = LocalTime.of(4, 0)
 
 /** An installed app, identified by its package name. */
@@ -66,10 +66,13 @@ data class Covenant(
     val weekendDays: Set<DayOfWeek> = setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY),
     val essentials: Set<AppId> = emptySet(),
     val ringThrough: Set<AppId> = emptySet(),
-    val weeklyEmergencyPass: Boolean = false,
+    /** Passes a week, from 0 to [MAX_PASSES_PER_WEEK]. Raising it waits the cooldown (R55). */
+    val passesPerWeek: Int = 1,
     /** How long a looser change waits (R22). Lengthening it applies at once; shortening waits (R26). */
     val cooldown: Duration = Duration.ofHours(72),
 )
+
+const val MAX_PASSES_PER_WEEK = 2
 
 const val MINUTES_PER_DAY = 24 * 60
 

@@ -120,8 +120,8 @@ fun TodayScreen(state: AppState, now: Instant) {
                                 }
                             }
                             if (run in unclean) {
-                                val borrow = state.activity.borrows.firstOrNull { it.startsAt.isAfter(run.start.toInstant()) && it.startsAt.isBefore(run.end.toInstant()) }
-                                val at = borrow?.startsAt?.atZone(Graph.zone) ?: run.start.plusMinutes(Duration.between(run.start, run.end).toMinutes() / 2)
+                                val pass = state.activity.passes.firstOrNull { it.startsAt.isAfter(run.start.toInstant()) && it.startsAt.isBefore(run.end.toInstant()) }
+                                val at = pass?.startsAt?.atZone(Graph.zone) ?: run.start.plusMinutes(Duration.between(run.start, run.end).toMinutes() / 2)
                                 val cy = size.height * yOf(at)
                                 for (k in 0 until 3) {
                                     val p = (ripple + k / 3f) % 1f

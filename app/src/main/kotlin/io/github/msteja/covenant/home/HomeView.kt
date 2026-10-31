@@ -81,17 +81,15 @@ fun homeView(context: Context, state: AppState, installed: List<InstalledApp>, n
     }
 
     val quiet = activity.quietUntil?.takeIf { it.isAfter(now) }
-    val focus = activity.focus?.takeIf { it.endsAt.isAfter(now) }
     val (chapter, until) = when {
-        focus != null -> "Focus" to "until ${shortTime(focus.endsAt.atZone(zone))}"
         quiet != null -> "Quiet" to "until ${shortTime(quiet.atZone(zone))}"
         running != null -> running.block.name to "until ${shortTime(running.end)}"
         else -> "Essentials only" to rules.schedule.nextBoundaryAfter(now)?.let { "until ${shortTime(it.atZone(zone))}" }
     }
 
     val blockApps = running?.block?.apps?.keys.orEmpty()
-    val borrowed = rules.exits.borrowInProgress(activity, now)?.app
-    val shown = installed.filter { (it.id in blockApps || it.id == borrowed) && it.id !in essentials && allowed(it) }
+    val passed = rules.exits.passInProgress(activity, now)?.app
+    val shown = installed.filter { (it.id in blockApps || it.id == passed) && it.id !in essentials && allowed(it) }
     val essentialApps = installed.filter { it.id in essentials }
 
     val after = (quiet ?: running?.end?.toInstant() ?: now)

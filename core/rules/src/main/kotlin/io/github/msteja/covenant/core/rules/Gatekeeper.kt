@@ -19,19 +19,19 @@ data class Moment(
 )
 
 sealed interface Access {
-    /** Opens with no pause: essentials, unlimited block apps, borrows and emergencies. */
+    /** Opens with no pause: essentials, unlimited block apps and passes. */
     data object Open : Access
 
     /** Opens after the pause, with this much screen time left in [block] (R12). */
     data class Limited(val left: Duration, val block: Occurrence) : Access
 
-    /** Outside the current block, or held back by focus or quiet now. [opensAt] is null when no block holds it. */
+    /** Outside the current block, or held back by Quiet. [opensAt] is null when no block holds it. */
     data class Blocked(val reason: Reason, val opensAt: ZonedDateTime?) : Access
 
     /** Its minutes are spent; hidden until [until], its next block (R13). */
     data class Hidden(val until: ZonedDateTime?) : Access
 
-    enum class Reason { NOT_IN_BLOCK, FOCUS_OR_QUIET }
+    enum class Reason { NOT_IN_BLOCK, QUIET }
 }
 
 /**
@@ -47,12 +47,10 @@ class Gatekeeper(
         val now = moment.now
         if (moment.systemAllowlisted || moment.inCallOrNavigating) return Access.Open
         if (app in covenant.essentials) return Access.Open
-        if (exits.emergencyRunning(activity, now) != null) return Access.Open
-        if (exits.essentialsOnlyAt(activity, now)) {
-            val freeAt = listOfNotNull(activity.quietUntil, activity.focus?.endsAt).filter { it.isAfter(now) }.max()
-            return Access.Blocked(Access.Reason.FOCUS_OR_QUIET, nextOpening(app, freeAt))
+        if (exits.quietAt(activity, now)) {
+            return Access.Blocked(Access.Reason.QUIET, nextOpening(app, activity.quietUntil!!))
         }
-        if (exits.borrowRunningFor(app, activity, now) != null) return Access.Open
+        if (exits.passRunningFor(app, activity, now) != null) return Access.Open
 
         val running = schedule.activeAt(now)
         val limit = running?.block?.apps?.get(app)

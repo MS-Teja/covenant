@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.msteja.covenant.Graph
 import io.github.msteja.covenant.core.model.CALIBRATION
+import io.github.msteja.covenant.core.model.MAX_PASSES_PER_WEEK
 import io.github.msteja.covenant.core.rules.ChangeRules
 import io.github.msteja.covenant.data.AppState
 import io.github.msteja.covenant.design.Ink
@@ -33,7 +34,7 @@ import java.time.Duration
 private val MIN_COOLDOWN: Duration = Duration.ofHours(72)
 private val MAX_COOLDOWN: Duration = Duration.ofDays(7)
 
-/** Settings: cooldown, exits, alert sounds, protection health and the seal. */
+/** Settings: cooldown, passes, alert sounds, protection health and the seal. */
 @Composable
 fun SettingsScreen(state: AppState, onBack: () -> Unit) {
     var sealing by remember { mutableStateOf(false) }
@@ -68,10 +69,12 @@ fun SettingsScreen(state: AppState, onBack: () -> Unit) {
         }
         Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                BasicText("Weekly emergency pass", style = Type.text(18.sp))
-                BasicText("30 minutes of everything, once a week", style = Type.text(13.sp, Ink.mist, italic = true))
+                BasicText("Passes a week", style = Type.text(18.sp))
+                BasicText("one hidden app for 10 minutes", style = Type.text(13.sp, Ink.mist, italic = true))
             }
-            QuietWord(if (draft.weeklyEmergencyPass) "on" else "off") { draft = draft.copy(weeklyEmergencyPass = !draft.weeklyEmergencyPass) }
+            QuietWord("fewer") { draft = draft.copy(passesPerWeek = (draft.passesPerWeek - 1).coerceAtLeast(0)) }
+            BasicText("${draft.passesPerWeek}", style = Type.text(18.sp, weight = 400).copy(fontFeatureSettings = Type.TABULAR))
+            QuietWord("more") { draft = draft.copy(passesPerWeek = (draft.passesPerWeek + 1).coerceAtMost(MAX_PASSES_PER_WEEK)) }
         }
         Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {

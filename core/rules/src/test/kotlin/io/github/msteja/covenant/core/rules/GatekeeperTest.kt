@@ -3,10 +3,9 @@ package io.github.msteja.covenant.core.rules
 import io.github.msteja.covenant.core.model.Activity
 import io.github.msteja.covenant.core.model.AppId
 import io.github.msteja.covenant.core.model.Block
-import io.github.msteja.covenant.core.model.Borrow
 import io.github.msteja.covenant.core.model.Covenant
-import io.github.msteja.covenant.core.model.EmergencyPass
 import io.github.msteja.covenant.core.model.Limit
+import io.github.msteja.covenant.core.model.Pass
 import io.github.msteja.covenant.core.model.Timeline
 import io.github.msteja.covenant.core.model.UsageKey
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -34,7 +33,7 @@ private val day = Timeline(
         Block("night", "Night", LocalTime.of(22, 0), LocalTime.of(8, 0), grayscale = true),
     ),
 )
-private val covenant = Covenant(weekday = day, weekend = day, essentials = setOf(phone), weeklyEmergencyPass = true)
+private val covenant = Covenant(weekday = day, weekend = day, essentials = setOf(phone))
 private val schedule = Schedule(covenant, ZONE)
 private val exits = Exits(covenant, schedule)
 private val gate = Gatekeeper(covenant, schedule, exits)
@@ -94,69 +93,90 @@ class GatekeeperTest {
     }
 
     @Test
-    fun `R27 quiet now keeps you on essentials until the next block`() {
-        val quiet = exits.quietNow(Activity(), t("2026-10-23T10:00"))!!
+    fun `R27 Quiet keeps you on essentials until the next block`() {
+        val quiet = exits.quiet(Activity(), t("2026-10-23T10:00"))!!
         assertEquals(t("2026-10-23T16:00"), quiet.quietUntil)
         val access = decide(gmail, "2026-10-23T10:01", quiet) as Access.Blocked
-        assertEquals(Access.Reason.FOCUS_OR_QUIET, access.reason)
+        assertEquals(Access.Reason.QUIET, access.reason)
         assertEquals(t("2026-10-24T08:00"), access.opensAt?.toInstant())
         assertEquals(Access.Open, decide(phone, "2026-10-23T10:01", quiet))
     }
 
     @Test
-    fun `R31 an emergency pass beats quiet now`() {
-        val activity = Activity(quietUntil = t("2026-10-23T16:00"), emergencyPasses = listOf(EmergencyPass(t("2026-10-23T10:00"))))
+    fun `R27 Quiet for an hour ends after an hour`() {
+        val quiet = exits.quiet(Activity(), t("2026-10-23T10:00"), Duration.ofMinutes(60))!!
+        assertInstanceOf(Access.Blocked::class.java, decide(gmail, "2026-10-23T10:59", quiet))
+        assertEquals(Access.Open, decide(gmail, "2026-10-23T11:00", quiet))
+    }
+
+    @Test
+    fun `R27 Quiet can't be shortened`() {
+        val long = exits.quiet(Activity(), t("2026-10-23T10:00"), Duration.ofMinutes(90))!!
+        val shorter = exits.quiet(long, t("2026-10-23T10:10"), Duration.ofMinutes(30))!!
+        assertEquals(t("2026-10-23T11:30"), shorter.quietUntil)
+    }
+
+    @Test
+    fun `R55 Quiet beats a running pass`() {
+        val activity = Activity(quietUntil = t("2026-10-23T16:00"), passes = listOf(Pass(uber, t("2026-10-23T10:00"))))
         assertInstanceOf(Access.Blocked::class.java, decide(uber, "2026-10-23T10:05", activity))
-        assertEquals(Access.Open, decide(uber, "2026-10-23T10:15", activity))
-        assertInstanceOf(Access.Blocked::class.java, decide(uber, "2026-10-23T10:41", activity))
     }
 }
 
 class ExitsTest {
     @Test
-    fun `R29 a borrow opens after a 1-minute wait, for 10 minutes`() {
-        val granted = exits.requestBorrow(uber, Activity(), t("2026-10-23T13:00")) as BorrowResult.Granted
-        val activity = Activity(borrows = listOf(granted.borrow))
+    fun `R55 a pass opens after a 1-minute wait, for 10 minutes`() {
+        val granted = exits.requestPass(uber, Activity(), t("2026-10-23T13:00")) as PassResult.Granted
+        val activity = Activity(passes = listOf(granted.pass))
         assertInstanceOf(Access.Blocked::class.java, decide(uber, "2026-10-23T13:00:30", activity))
         assertEquals(Access.Open, decide(uber, "2026-10-23T13:01", activity))
         assertInstanceOf(Access.Blocked::class.java, decide(uber, "2026-10-23T13:11", activity))
     }
 
     @Test
-    fun `R29 a borrow outlasts a block change`() {
-        val activity = Activity(borrows = listOf(Borrow(uber, t("2026-10-23T15:58"))))
+    fun `R55 a pass opens an app whose time ran out`() {
+        val usage = mapOf(UsageKey(instagram, "evening", LocalDate.parse("2026-10-23")) to Duration.ofMinutes(30))
+        val activity = Activity(passes = listOf(Pass(instagram, t("2026-10-23T17:00"))))
+        assertEquals(Access.Open, decide(instagram, "2026-10-23T17:05", activity, usage))
+    }
+
+    @Test
+    fun `R55 a pass outlasts a block change`() {
+        val activity = Activity(passes = listOf(Pass(uber, t("2026-10-23T15:58"))))
         assertEquals(Access.Open, decide(uber, "2026-10-23T16:05", activity))
     }
 
     @Test
-    fun `R29 one borrow at a time`() {
-        val activity = Activity(borrows = listOf(Borrow(uber, t("2026-10-23T13:00"))))
-        assertInstanceOf(BorrowResult.AlreadyRunning::class.java, exits.requestBorrow(gmail, activity, t("2026-10-23T13:05")))
+    fun `R55 one pass at a time`() {
+        val two = Exits(covenant.copy(passesPerWeek = 2), schedule)
+        val activity = Activity(passes = listOf(Pass(uber, t("2026-10-23T13:00"))))
+        assertInstanceOf(PassResult.AlreadyRunning::class.java, two.requestPass(gmail, activity, t("2026-10-23T13:05")))
     }
 
     @Test
-    fun `R29 two a day, reset at 4 am`() {
-        val activity = Activity(borrows = listOf(Borrow(uber, t("2026-10-23T09:00")), Borrow(uber, t("2026-10-23T13:00"))))
-        assertEquals(BorrowResult.NoneLeftToday, exits.requestBorrow(uber, activity, t("2026-10-24T03:30")))
-        assertInstanceOf(BorrowResult.Granted::class.java, exits.requestBorrow(uber, activity, t("2026-10-24T04:00")))
+    fun `R55 one a week, back 7 days after it was used`() {
+        val activity = Activity(passes = listOf(Pass(uber, t("2026-10-20T10:00"))))
+        assertEquals(0, exits.passesLeft(activity, t("2026-10-23T10:00")))
+        assertEquals(PassResult.NoneLeft(t("2026-10-27T10:00")), exits.requestPass(uber, activity, t("2026-10-23T10:00")))
+        assertInstanceOf(PassResult.Granted::class.java, exits.requestPass(uber, activity, t("2026-10-27T10:00")))
     }
 
     @Test
-    fun `R29 no borrows during quiet now`() {
+    fun `R55 with two a week, the older one comes back first`() {
+        val two = Exits(covenant.copy(passesPerWeek = 2), schedule)
+        val activity = Activity(passes = listOf(Pass(uber, t("2026-10-20T10:00")), Pass(uber, t("2026-10-22T10:00"))))
+        assertEquals(PassResult.NoneLeft(t("2026-10-27T10:00")), two.requestPass(uber, activity, t("2026-10-23T10:00")))
+    }
+
+    @Test
+    fun `R55 no passes when none are allowed`() {
+        val none = Exits(covenant.copy(passesPerWeek = 0), schedule)
+        assertEquals(PassResult.NoneLeft(null), none.requestPass(uber, Activity(), t("2026-10-23T10:00")))
+    }
+
+    @Test
+    fun `R55 no pass during Quiet`() {
         val activity = Activity(quietUntil = t("2026-10-23T16:00"))
-        assertEquals(BorrowResult.FocusOrQuiet, exits.requestBorrow(uber, activity, t("2026-10-23T12:00")))
-    }
-
-    @Test
-    fun `R31 the weekly pass comes back 7 days after the last one`() {
-        val activity = Activity(emergencyPasses = listOf(EmergencyPass(t("2026-10-20T10:00"))))
-        assertEquals(EmergencyResult.NotYet(t("2026-10-27T10:00")), exits.requestEmergency(activity, t("2026-10-23T10:00")))
-        assertInstanceOf(EmergencyResult.Granted::class.java, exits.requestEmergency(activity, t("2026-10-27T10:00")))
-    }
-
-    @Test
-    fun `R31 the pass does nothing when it's turned off`() {
-        val off = Exits(covenant.copy(weeklyEmergencyPass = false), schedule)
-        assertEquals(EmergencyResult.TurnedOff, off.requestEmergency(Activity(), t("2026-10-23T10:00")))
+        assertEquals(PassResult.Quiet, exits.requestPass(uber, activity, t("2026-10-23T12:00")))
     }
 }

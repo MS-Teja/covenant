@@ -42,17 +42,16 @@ data class AppState(
         return copy(usage = updated)
     }
 
-    /** Drops what no rule needs any more: older usage, borrows and passes. */
+    /** Drops what no rule needs any more: older usage, passes and let-gos. */
     fun pruned(now: Instant): AppState {
         val dayAgo = now.minus(Duration.ofDays(2))
         val weekAgo = now.minus(Duration.ofDays(8))
         return copy(
             usage = usage.filter { !it.key.day.isBefore(java.time.LocalDate.now().minusDays(2)) },
             activity = activity.copy(
-                borrows = activity.borrows.filter { it.requestedAt.isAfter(dayAgo) },
-                emergencyPasses = activity.emergencyPasses.filter { it.requestedAt.isAfter(weekAgo) },
+                passes = activity.passes.filter { it.requestedAt.isAfter(weekAgo) },
                 quietUntil = activity.quietUntil?.takeIf { it.isAfter(now) },
-                focus = activity.focus?.takeIf { it.endsAt.isAfter(now) },
+                letGos = activity.letGos.filter { it.at.isAfter(dayAgo) },
             ),
         )
     }

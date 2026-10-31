@@ -18,7 +18,7 @@ private const val MINUTES_PER_WEEK = 7 * 24 * 60
 fun isNoLooser(proposed: Covenant, current: Covenant): Boolean {
     if (!current.essentials.containsAll(proposed.essentials)) return false
     if (!current.ringThrough.containsAll(proposed.ringThrough)) return false
-    if (proposed.weeklyEmergencyPass && !current.weeklyEmergencyPass) return false
+    if (proposed.passesPerWeek > current.passesPerWeek) return false
     if (proposed.weekendDays != current.weekendDays) return false
     if (proposed.cooldown < current.cooldown) return false
     return timelinesNoLooser(proposed, current)

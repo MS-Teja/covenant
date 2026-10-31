@@ -3,11 +3,11 @@ package io.github.msteja.covenant.core.rules
 import io.github.msteja.covenant.core.model.Activity
 import io.github.msteja.covenant.core.model.AppId
 import io.github.msteja.covenant.core.model.Block
-import io.github.msteja.covenant.core.model.Borrow
 import io.github.msteja.covenant.core.model.Commitments
 import io.github.msteja.covenant.core.model.Covenant
 import io.github.msteja.covenant.core.model.HeldNotification
 import io.github.msteja.covenant.core.model.Limit
+import io.github.msteja.covenant.core.model.Pass
 import io.github.msteja.covenant.core.model.Timeline
 import io.github.msteja.covenant.core.model.UsageKey
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -78,6 +78,12 @@ class LoosenessTest {
     @Test
     fun `R26 lengthening the cooldown is stricter`() {
         assertTrue(isNoLooser(base.copy(cooldown = Duration.ofHours(96)), base))
+    }
+
+    @Test
+    fun `R55 raising passes per week is looser, lowering them is stricter`() {
+        assertFalse(isNoLooser(base.copy(passesPerWeek = 2), base))
+        assertTrue(isNoLooser(base.copy(passesPerWeek = 0), base))
     }
 }
 
@@ -172,10 +178,10 @@ class NotificationRouteTest {
     }
 
     @Test
-    fun `R40 a borrow costs the block its clean record`() {
+    fun `R40 a pass costs the block its clean record`() {
         val run = Schedule(base, Z).activeAt(at("2026-10-23T12:00"))!!
         assertTrue(isClean(run, Activity(), emptyList()))
-        assertFalse(isClean(run, Activity(borrows = listOf(Borrow(insta, at("2026-10-23T13:00")))), emptyList()))
+        assertFalse(isClean(run, Activity(passes = listOf(Pass(insta, at("2026-10-23T13:00")))), emptyList()))
     }
 }
 

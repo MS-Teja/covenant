@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import io.github.msteja.covenant.Graph
 import io.github.msteja.covenant.core.model.AppId
 import io.github.msteja.covenant.core.model.Covenant
+import io.github.msteja.covenant.core.model.MAX_PASSES_PER_WEEK
 import io.github.msteja.covenant.core.rules.ChangeRules
 import io.github.msteja.covenant.data.AppState
 import io.github.msteja.covenant.data.Starter
@@ -45,7 +46,7 @@ private enum class Step(val head: String) {
     Essentials("Essentials"),
     Timeline("Your day"),
     Calls("Ring-through"),
-    Exits("Emergency pass"),
+    Exits("Passes"),
     Permissions("Permissions"),
     Seal("Your covenant"),
 }
@@ -118,20 +119,19 @@ fun SetupWizard(state: AppState) {
                 ) { save(covenant.copy(ringThrough = it)) }
                 Step.Exits -> Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                     BasicText(
-                        "Once a week, everything opens for 30 minutes after a 10-minute wait. It beats focus and quiet now.",
+                        "A pass opens one hidden app for 10 minutes, after a 1-minute wait. Each comes back 7 days after you use it.",
                         style = Type.text(17.sp).copy(textAlign = TextAlign.Center),
                     )
                     Row(Modifier.padding(top = 18.dp), horizontalArrangement = Arrangement.Center) {
-                        WordButton("On", style = Type.display(24.sp, 360, if (covenant.weeklyEmergencyPass) Ink.bone else Ink.slate)) {
-                            save(covenant.copy(weeklyEmergencyPass = true))
-                        }
-                        WordButton("Off", style = Type.display(24.sp, 360, if (!covenant.weeklyEmergencyPass) Ink.bone else Ink.slate)) {
-                            save(covenant.copy(weeklyEmergencyPass = false))
+                        for (count in 0..MAX_PASSES_PER_WEEK) {
+                            WordButton("$count", style = Type.display(24.sp, 360, if (covenant.passesPerWeek == count) Ink.bone else Ink.slate)) {
+                                save(covenant.copy(passesPerWeek = count))
+                            }
                         }
                     }
                     BasicText(
-                        "Borrows are always there: 2 a day, 10 minutes each, after a 1-minute wait.",
-                        Modifier.padding(top = 18.dp),
+                        "a week. One is enough for most weeks; more waits ${covenant.cooldown.toHours()} hours later.",
+                        Modifier.padding(top = 6.dp),
                         style = Type.text(14.sp, Ink.mist, italic = true).copy(textAlign = TextAlign.Center),
                     )
                 }

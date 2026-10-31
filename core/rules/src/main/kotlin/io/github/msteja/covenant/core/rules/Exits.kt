@@ -2,88 +2,76 @@ package io.github.msteja.covenant.core.rules
 
 import io.github.msteja.covenant.core.model.Activity
 import io.github.msteja.covenant.core.model.AppId
-import io.github.msteja.covenant.core.model.Borrow
 import io.github.msteja.covenant.core.model.Covenant
-import io.github.msteja.covenant.core.model.EmergencyPass
+import io.github.msteja.covenant.core.model.Pass
 import java.time.Duration
 import java.time.Instant
 
-val BORROW_WAIT: Duration = Duration.ofMinutes(1)
-val BORROW_LENGTH: Duration = Duration.ofMinutes(10)
-const val BORROWS_PER_DAY = 2
+val PASS_WAIT: Duration = Duration.ofMinutes(1)
+val PASS_LENGTH: Duration = Duration.ofMinutes(10)
+/** A used pass comes back this long after it was asked for. */
+val PASS_RETURNS: Duration = Duration.ofDays(7)
 
-val EMERGENCY_WAIT: Duration = Duration.ofMinutes(10)
-val EMERGENCY_LENGTH: Duration = Duration.ofMinutes(30)
-val EMERGENCY_EVERY: Duration = Duration.ofDays(7)
+/** The lengths Quiet offers besides "until the next block" (R27). */
+val QUIET_LENGTHS: List<Duration> = listOf(30L, 60L, 90L).map(Duration::ofMinutes)
 
-val Borrow.startsAt: Instant get() = requestedAt.plus(BORROW_WAIT)
-val Borrow.endsAt: Instant get() = startsAt.plus(BORROW_LENGTH)
-val EmergencyPass.startsAt: Instant get() = requestedAt.plus(EMERGENCY_WAIT)
-val EmergencyPass.endsAt: Instant get() = startsAt.plus(EMERGENCY_LENGTH)
+val Pass.startsAt: Instant get() = requestedAt.plus(PASS_WAIT)
+val Pass.endsAt: Instant get() = startsAt.plus(PASS_LENGTH)
 
-sealed interface BorrowResult {
-    data class Granted(val borrow: Borrow) : BorrowResult
-    data object NoneLeftToday : BorrowResult
-    data class AlreadyRunning(val borrow: Borrow) : BorrowResult
-    data object FocusOrQuiet : BorrowResult
+sealed interface PassResult {
+    data class Granted(val pass: Pass) : PassResult
+    /** No pass left this week; the next one comes back at [backAt], or never when none are allowed. */
+    data class NoneLeft(val backAt: Instant?) : PassResult
+    data class AlreadyRunning(val pass: Pass) : PassResult
+    data object Quiet : PassResult
 }
 
-sealed interface EmergencyResult {
-    data class Granted(val pass: EmergencyPass) : EmergencyResult
-    data object TurnedOff : EmergencyResult
-    data class NotYet(val availableAt: Instant) : EmergencyResult
-    data class AlreadyRunning(val pass: EmergencyPass) : EmergencyResult
-}
-
-/** Borrows (R29), quiet now (R27) and the weekly emergency pass (R31). */
+/** The weekly pass (R55) and Quiet (R27). */
 class Exits(
     private val covenant: Covenant,
     private val schedule: Schedule,
 ) {
-    /** A borrow that is waiting or running at [now]. Only one at a time. */
-    fun borrowInProgress(activity: Activity, now: Instant): Borrow? =
-        activity.borrows.firstOrNull { !now.isBefore(it.requestedAt) && now.isBefore(it.endsAt) }
+    /** A pass that is waiting or running at [now]. Only one at a time. */
+    fun passInProgress(activity: Activity, now: Instant): Pass? =
+        activity.passes.firstOrNull { !now.isBefore(it.requestedAt) && now.isBefore(it.endsAt) }
 
-    /** The borrow giving [app] its screen at [now], once its wait is over. */
-    fun borrowRunningFor(app: AppId, activity: Activity, now: Instant): Borrow? =
-        activity.borrows.firstOrNull { it.app == app && !now.isBefore(it.startsAt) && now.isBefore(it.endsAt) }
+    /** The pass giving [app] its screen at [now], once its wait is over. */
+    fun passRunningFor(app: AppId, activity: Activity, now: Instant): Pass? =
+        activity.passes.firstOrNull { it.app == app && !now.isBefore(it.startsAt) && now.isBefore(it.endsAt) }
 
-    /** Borrows left on the day of [now]. The count resets at 4 am. */
-    fun borrowsLeft(activity: Activity, now: Instant): Int {
-        val today = schedule.dayOf(now)
-        return BORROWS_PER_DAY - activity.borrows.count { schedule.dayOf(it.requestedAt) == today }
+    /** Passes asked for in the 7 days before [now]; each comes back 7 days after it was used. */
+    private fun recent(activity: Activity, now: Instant): List<Pass> =
+        activity.passes.filter { !it.requestedAt.isAfter(now) && now.isBefore(it.requestedAt.plus(PASS_RETURNS)) }
+
+    fun passesLeft(activity: Activity, now: Instant): Int =
+        (covenant.passesPerWeek - recent(activity, now).size).coerceAtLeast(0)
+
+    /** When the next pass comes back, if none is left at [now]. Null when one is left, or none are allowed. */
+    fun nextPassAt(activity: Activity, now: Instant): Instant? {
+        if (covenant.passesPerWeek == 0 || passesLeft(activity, now) > 0) return null
+        val used = recent(activity, now).map { it.requestedAt }.sorted()
+        // With n passes a week, the oldest of the last n comes back first.
+        return used[used.size - covenant.passesPerWeek].plus(PASS_RETURNS)
     }
 
-    fun requestBorrow(app: AppId, activity: Activity, now: Instant): BorrowResult {
-        borrowInProgress(activity, now)?.let { return BorrowResult.AlreadyRunning(it) }
-        if (essentialsOnlyAt(activity, now)) return BorrowResult.FocusOrQuiet
-        if (borrowsLeft(activity, now) <= 0) return BorrowResult.NoneLeftToday
-        return BorrowResult.Granted(Borrow(app, now))
+    fun requestPass(app: AppId, activity: Activity, now: Instant): PassResult {
+        passInProgress(activity, now)?.let { return PassResult.AlreadyRunning(it) }
+        if (quietAt(activity, now)) return PassResult.Quiet
+        if (passesLeft(activity, now) <= 0) return PassResult.NoneLeft(nextPassAt(activity, now))
+        return PassResult.Granted(Pass(app, now))
     }
 
-    fun emergencyRunning(activity: Activity, now: Instant): EmergencyPass? =
-        activity.emergencyPasses.firstOrNull { !now.isBefore(it.startsAt) && now.isBefore(it.endsAt) }
-
-    /** The pass comes back 7 days after the last one was asked for. */
-    fun emergencyAvailableAt(activity: Activity): Instant? =
-        activity.emergencyPasses.maxOfOrNull { it.requestedAt }?.plus(EMERGENCY_EVERY)
-
-    fun requestEmergency(activity: Activity, now: Instant): EmergencyResult {
-        if (!covenant.weeklyEmergencyPass) return EmergencyResult.TurnedOff
-        activity.emergencyPasses.firstOrNull { !now.isBefore(it.requestedAt) && now.isBefore(it.endsAt) }
-            ?.let { return EmergencyResult.AlreadyRunning(it) }
-        emergencyAvailableAt(activity)?.takeIf { now.isBefore(it) }?.let { return EmergencyResult.NotYet(it) }
-        return EmergencyResult.Granted(EmergencyPass(now))
+    /**
+     * R27: Quiet for [length], or until the current block ends when [length] is null. It never shortens
+     * a Quiet already running. Null when there's no block to end and no length was given.
+     */
+    fun quiet(activity: Activity, now: Instant, length: Duration? = null): Activity? {
+        val until = length?.let { now.plus(it) } ?: schedule.activeAt(now)?.end?.toInstant() ?: return null
+        val kept = activity.quietUntil?.takeIf { it.isAfter(until) } ?: until
+        return activity.copy(quietUntil = kept)
     }
 
-    /** R27: quiet now lasts until the current block would have ended. Null when no block is running. */
-    fun quietNow(activity: Activity, now: Instant): Activity? {
-        val running = schedule.activeAt(now) ?: return null
-        return activity.copy(quietUntil = running.end.toInstant())
-    }
-
-    /** Focus timer or quiet now: only essentials open (R27, R28). */
-    fun essentialsOnlyAt(activity: Activity, now: Instant): Boolean =
-        activity.quietUntil?.let { now.isBefore(it) } == true ||
-            activity.focus?.let { !now.isBefore(it.startedAt) && now.isBefore(it.endsAt) } == true
+    /** Quiet is on: only essentials open (R27). */
+    fun quietAt(activity: Activity, now: Instant): Boolean =
+        activity.quietUntil?.let { now.isBefore(it) } == true
 }
