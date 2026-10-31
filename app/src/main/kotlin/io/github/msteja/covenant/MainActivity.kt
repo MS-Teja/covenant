@@ -17,7 +17,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import io.github.msteja.covenant.core.model.AppId
 import io.github.msteja.covenant.data.AppState
 import io.github.msteja.covenant.design.InkScreen
 import io.github.msteja.covenant.design.hueAt
@@ -28,7 +27,6 @@ import io.github.msteja.covenant.editor.TimelineEditor
 import io.github.msteja.covenant.guard.CovenantAccessibilityService
 import io.github.msteja.covenant.guard.Notifier
 import io.github.msteja.covenant.guard.Scheduler
-import io.github.msteja.covenant.home.BlockedScreen
 import io.github.msteja.covenant.home.HomeScreen
 import io.github.msteja.covenant.home.MenuScreen
 import io.github.msteja.covenant.home.SearchScreen
@@ -43,19 +41,10 @@ import java.time.LocalTime
 class MainActivity : ComponentActivity() {
     private var screen by mutableStateOf<Screen>(Screen.Home)
 
-    /** When the blocked screen last appeared; Android's Home intents that follow it are echoes. */
-    private var blockedShownAt = 0L
-
-    private fun showBlocked(app: AppId) {
-        screen = Screen.Blocked(app)
-        blockedShownAt = android.os.SystemClock.uptimeMillis()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(SystemBarStyle.dark(android.graphics.Color.TRANSPARENT), SystemBarStyle.dark(android.graphics.Color.TRANSPARENT))
         super.onCreate(savedInstanceState)
         Notifier.createChannels(this)
-        handle(intent)
         setContent {
             val state by Graph.store.state.collectAsState()
             state?.let { Root(it) }
@@ -64,10 +53,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        // Pressing Home while already home returns to the first page, unless the guard just sent you here.
-        val echo = android.os.SystemClock.uptimeMillis() - blockedShownAt < 1500
-        if (intent.hasCategory(Intent.CATEGORY_HOME) && Graph.blocked.value == null && !echo) screen = Screen.Home
-        handle(intent)
+        // Pressing Home while already home returns to the first page.
+        if (intent.hasCategory(Intent.CATEGORY_HOME)) screen = Screen.Home
     }
 
     override fun onResume() {
@@ -76,27 +63,12 @@ class MainActivity : ComponentActivity() {
         Graph.scope.launch { Scheduler.wake(applicationContext) }
     }
 
-    private fun handle(intent: Intent?) {
-        intent?.getStringExtra(EXTRA_BLOCKED)?.let { showBlocked(AppId(it)) }
-        Graph.blocked.value?.let {
-            Graph.blocked.value = null
-            showBlocked(it)
-        }
-    }
-
     @Composable
     private fun Root(state: AppState) {
         val context = LocalContext.current
         val now = rememberNow()
         val apps by Graph.catalog.apps.collectAsState()
         val hue = hueAt(LocalTime.now())
-        val blocked by Graph.blocked.collectAsState()
-        LaunchedEffect(blocked) {
-            blocked?.let {
-                Graph.blocked.value = null
-                showBlocked(it)
-            }
-        }
         InkScreen(hue = hue) {
             if (!state.setupDone) {
                 SetupWizard(state)
@@ -104,7 +76,7 @@ class MainActivity : ComponentActivity() {
             }
             val view = homeView(context, state, apps, now)
             val back = { screen = Screen.Home }
-            when (val current = screen) {
+            when (screen) {
                 Screen.Home -> {
                     val pager = rememberPagerState { 2 }
                     val scope = rememberCoroutineScope()
@@ -129,7 +101,6 @@ class MainActivity : ComponentActivity() {
                     screen = Screen.Home
                     Graph.catalog.launch(app)
                 }, onClose = back)
-                is Screen.Blocked -> BlockedScreen(current.app, state, onOpened = back, onBack = back)
                 Screen.Menu -> MenuScreen(
                     pendingCount = state.commitments.pending.size,
                     canQuiet = Graph.rules(state.commitments).schedule.activeAt(now) != null,
@@ -166,10 +137,5 @@ class MainActivity : ComponentActivity() {
         data object Lists : Screen
         data object Pending : Screen
         data object Settings : Screen
-        data class Blocked(val app: AppId) : Screen
-    }
-
-    companion object {
-        const val EXTRA_BLOCKED = "io.github.msteja.covenant.BLOCKED"
     }
 }

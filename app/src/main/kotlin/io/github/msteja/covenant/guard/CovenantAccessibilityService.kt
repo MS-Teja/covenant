@@ -2,25 +2,34 @@ package io.github.msteja.covenant.guard
 
 import android.accessibilityservice.AccessibilityService
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import io.github.msteja.covenant.Graph
-import io.github.msteja.covenant.MainActivity
 import io.github.msteja.covenant.core.model.AppId
 import io.github.msteja.covenant.core.model.UsageKey
 import io.github.msteja.covenant.core.rules.Access
 import io.github.msteja.covenant.core.rules.warningsAfter
+import io.github.msteja.covenant.design.InkScreen
+import io.github.msteja.covenant.design.hueAt
+import io.github.msteja.covenant.home.BlockedScreen
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.Instant
+import java.time.LocalTime
 
 /**
  * Watches which app comes to the front and asks the rule engine about it, so a notification tap or
@@ -30,7 +39,11 @@ class CovenantAccessibilityService : AccessibilityService() {
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var overlays: OverlayHost
     private var foreground: String? = null
+    /** The foreground app when it's a browser tab an allowed app opened, which rides on that app's visit (R60). */
+    private var handedOff: String? = null
     private var since: Instant? = null
+    private val windowKinds = mutableMapOf<String, Boolean>()
+    private val debuggable by lazy { applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0 }
     private val lastLeft = mutableMapOf<String, Instant>()
     private val timers = mutableListOf<Runnable>()
     private var focus: AudioFocusRequest? = null
@@ -60,13 +73,19 @@ class CovenantAccessibilityService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         if (event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
         val packageName = event.packageName?.toString() ?: return
+        val className = event.className?.toString()
         if (packageName == foreground) return
-        // Covenant's own overlays report window changes too, but they sit over the app rather than replace it.
-        if (packageName == this.packageName && overlays.showing && event.className != MainActivity::class.java.name) return
-        leave(foreground)
+        // Dialogs, pop-ups, the keyboard and overlays (Covenant's own included) sit over the app rather than replace it.
+        if (!isActivityWindow(packageName, className)) return
+        val cameFrom = foreground
+        val handOff = className.isBrowserTab() && cameFrom != null && isOpenNow(cameFrom)
+        leave(cameFrom)
         foreground = packageName
+        handedOff = if (handOff) packageName else null
         since = Graph.now()
-        check(packageName, arriving = true)
+        // A different app, other than the home screen the guard just sent you to, ends the blocked moment.
+        if (packageName != SystemAllowlist.defaultHome(this)) overlays.dismiss(BLOCKED)
+        check(packageName, className, arriving = true)
     }
 
     override fun onInterrupt() = Unit
@@ -90,7 +109,7 @@ class CovenantAccessibilityService : AccessibilityService() {
     }
 
     private fun judge(app: String) {
-        if (SystemAllowlist.contains(this, app)) return
+        if (SystemAllowlist.contains(this, app) || app == handedOff) return
         val now = Graph.now()
         val access = Guard.decide(this, AppId(app), now)
         val soon = Guard.decide(this, AppId(app), now.plusSeconds(61))
@@ -105,13 +124,20 @@ class CovenantAccessibilityService : AccessibilityService() {
 
     fun openNotifications() = performGlobalAction(GLOBAL_ACTION_NOTIFICATIONS)
 
-    private fun check(app: String, arriving: Boolean) {
+    private fun check(app: String, className: String?, arriving: Boolean) {
         cancelTimers()
         if (SystemAllowlist.contains(this, app)) {
+            log(app, className, "allowlisted")
             overlays.dismiss(PAUSE)
             return
         }
-        when (val access = Guard.decide(this, AppId(app))) {
+        if (app == handedOff) {
+            log(app, className, "hand-off from an allowed app")
+            return
+        }
+        val access = Guard.decide(this, AppId(app))
+        log(app, className, access.toString())
+        when (access) {
             is Access.Blocked, is Access.Hidden -> sendHome(app)
             is Access.Limited -> {
                 if (arriving && isNewVisit(app)) showPause(access)
@@ -164,14 +190,51 @@ class CovenantAccessibilityService : AccessibilityService() {
         handler.postDelayed({ overlays.dismiss(WARNING) }, WARNING_SHOWN.toMillis())
     }
 
-    /** "Closes" means sent home with re-entry blocked; home explains why (R7, blocked screen). */
+    /**
+     * "Closes" means sent home with re-entry blocked, and the blocked screen says why (R7). It's drawn
+     * over whatever the home screen is, so it explains itself even before Covenant is the home app.
+     */
     private fun sendHome(app: String) {
         cancelTimers()
         overlays.dismissAll()
         releaseAudio()
-        // Home reads the blocked app from here, whichever arrives first: this or the Home intent.
-        Graph.blocked.value = AppId(app)
         performGlobalAction(GLOBAL_ACTION_HOME)
+        showBlocked(AppId(app))
+    }
+
+    private fun showBlocked(app: AppId) {
+        overlays.show(BLOCKED, fullScreen = true, onBack = { overlays.dismiss(BLOCKED) }) { dismiss ->
+            val state by Graph.store.state.collectAsState()
+            InkScreen(hue = hueAt(LocalTime.now())) {
+                state?.let { BlockedScreen(app, it, onOpened = dismiss, onBack = dismiss) }
+            }
+        }
+    }
+
+    /** True for a window that is one of [pkg]'s activities: a real switch to that app. */
+    private fun isActivityWindow(pkg: String, cls: String?): Boolean {
+        if (cls == null) return true
+        return windowKinds.getOrPut("$pkg/$cls") {
+            try {
+                packageManager.getActivityInfo(ComponentName(pkg, cls), 0)
+                true
+            } catch (_: PackageManager.NameNotFoundException) {
+                // Not one of its activities. If Covenant can't see the package at all, it can't tell, so it counts.
+                runCatching { packageManager.getPackageInfo(pkg, 0) }.isFailure
+            }
+        }
+    }
+
+    /** Whether [app] may be on screen right now, so a browser tab it opens can ride on its visit. */
+    private fun isOpenNow(app: String): Boolean =
+        SystemAllowlist.contains(this, app) || app == handedOff || !Guard.decide(this, AppId(app)).closes()
+
+    /** Browser tabs other apps open for sign-ins, payments and help pages (Custom Tabs, Auth Tabs, Firefox's equivalent). */
+    private fun String?.isBrowserTab(): Boolean =
+        this != null && BROWSER_TABS.any { endsWith(it) }
+
+    private fun log(app: String, className: String?, decision: String) {
+        if (debuggable) Log.i(TAG, "$app ($className): $decision")
     }
 
     private fun leave(app: String?) {
@@ -187,7 +250,7 @@ class CovenantAccessibilityService : AccessibilityService() {
         val start = since ?: return null
         val now = Graph.now()
         since = now
-        if (SystemAllowlist.contains(this, app)) return null
+        if (SystemAllowlist.contains(this, app) || app == handedOff) return null
         val run = Graph.rules().schedule.activeAt(start) ?: return null
         val spent = Duration.between(start, now)
         return Graph.store.launchUpdate { it.addUsage(UsageKey(AppId(app), run.block.id, run.day), spent) }
@@ -225,8 +288,11 @@ class CovenantAccessibilityService : AccessibilityService() {
         var instance: CovenantAccessibilityService? = null
             private set
 
+        private const val TAG = "CovenantGuard"
         private const val PAUSE = "pause"
         private const val WARNING = "warning"
+        private const val BLOCKED = "blocked"
+        private val BROWSER_TABS = listOf("CustomTabActivity", "AuthTabActivity", "ExternalAppBrowserActivity")
         private val VISIT_GAP: Duration = Duration.ofSeconds(30)
         private val WARNING_SHOWN: Duration = Duration.ofSeconds(8)
     }

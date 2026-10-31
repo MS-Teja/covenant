@@ -3,8 +3,10 @@ package io.github.msteja.covenant.guard
 import android.content.Context
 import android.graphics.PixelFormat
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.FrameLayout
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
@@ -67,20 +69,30 @@ private class OverlayOwner : SavedStateRegistryOwner {
     }
 }
 
+/** A window root that hands the Back key to [onBack]: an overlay has no activity to do it. */
+private class BackKeyFrame(context: Context, private val onBack: (() -> Unit)?) : FrameLayout(context) {
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.keyCode != KeyEvent.KEYCODE_BACK) return super.dispatchKeyEvent(event)
+        if (event.action == KeyEvent.ACTION_UP) onBack?.invoke()
+        return true
+    }
+}
+
 /** Draws Covenant's moments over other apps, from the accessibility service's own overlay layer. */
 class OverlayHost(private val context: Context) {
     private val windows = context.getSystemService(WindowManager::class.java)
     private val shown = mutableMapOf<String, Pair<View, OverlayOwner>>()
 
-    val showing: Boolean get() = shown.isNotEmpty()
+    fun isShowing(tag: String): Boolean = tag in shown
 
-    fun show(tag: String, fullScreen: Boolean, content: @Composable (dismiss: () -> Unit) -> Unit) {
+    /** Shows [content] in a window of its own. Back runs [onBack]; without it, Back does nothing. */
+    fun show(tag: String, fullScreen: Boolean, onBack: (() -> Unit)? = null, content: @Composable (dismiss: () -> Unit) -> Unit) {
         dismiss(tag)
         val owner = OverlayOwner().apply { start() }
-        val view = ComposeView(context).apply {
+        val view = BackKeyFrame(context, onBack).apply {
             setViewTreeLifecycleOwner(owner)
             setViewTreeSavedStateRegistryOwner(owner)
-            setContent { content { dismiss(tag) } }
+            addView(ComposeView(context).apply { setContent { content { dismiss(tag) } } })
         }
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,

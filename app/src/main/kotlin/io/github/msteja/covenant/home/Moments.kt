@@ -109,7 +109,6 @@ fun SearchScreen(view: HomeView, chapter: String, onOpen: (InstalledApp) -> Unit
 /** The blocked screen: why, when it opens, and the pass (R55). */
 @Composable
 fun BlockedScreen(app: AppId, state: AppState, onOpened: () -> Unit, onBack: () -> Unit) {
-    BackHandler(onBack = onBack)
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val now = rememberNow()

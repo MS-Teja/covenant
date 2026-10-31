@@ -1,7 +1,10 @@
 package io.github.msteja.covenant.guard
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.AudioManager
+import android.os.SystemClock
 import android.provider.Settings
 import android.telecom.TelecomManager
 import io.github.msteja.covenant.Graph
@@ -23,6 +26,8 @@ object SystemAllowlist {
         "com.android.packageinstaller",
         "com.google.android.packageinstaller",
         "com.google.android.gms",
+        // Updates and in-app update screens for every app, essentials included.
+        "com.android.vending",
         "com.android.documentsui",
         "com.google.android.documentsui",
         "com.android.providers.media.module",
@@ -51,7 +56,26 @@ object SystemAllowlist {
         packageName == context.packageName ||
             packageName in packages ||
             packageName == currentKeyboard(context) ||
+            packageName == defaultHome(context) ||
             packageName == context.getSystemService(TelecomManager::class.java)?.defaultDialerPackage
+
+    private var home: String? = null
+    private var homeCheckedAt = 0L
+
+    /** The home app Android opens on Home, rechecked every few seconds. Null when none is chosen. */
+    fun defaultHome(context: Context): String? {
+        val now = SystemClock.uptimeMillis()
+        if (homeCheckedAt == 0L || now - homeCheckedAt > HOME_RECHECK_MILLIS) {
+            home = context.packageManager
+                .resolveActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), PackageManager.MATCH_DEFAULT_ONLY)
+                ?.activityInfo?.packageName
+                ?.takeIf { it != "android" }
+            homeCheckedAt = now
+        }
+        return home
+    }
+
+    private const val HOME_RECHECK_MILLIS = 10_000L
 
     private fun currentKeyboard(context: Context): String? =
         Settings.Secure.getString(context.contentResolver, Settings.Secure.DEFAULT_INPUT_METHOD)
