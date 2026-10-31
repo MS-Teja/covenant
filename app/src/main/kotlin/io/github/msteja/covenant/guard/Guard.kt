@@ -76,11 +76,14 @@ object Guard {
 
     fun decide(context: Context, app: AppId, now: Instant = Graph.now()): Access {
         val state = Graph.store.current
+        // Nothing is enforced until setup is finished: a fresh install never blocks the phone it lands on.
+        if (!state.setupDone) return Access.Open
         return Graph.rules(state.commitments).decide(app, moment(context, app, now), state.activity, state.usageMap)
     }
 
     fun route(context: Context, app: AppId, isCall: Boolean, now: Instant = Graph.now()): Route {
         val state = Graph.store.current
+        if (!state.setupDone) return Route.Deliver
         val moment = moment(context, app, now).copy(inCallOrNavigating = app.packageName in navigating)
         return Graph.rules(state.commitments).route(app, isCall, moment, state.activity, state.usageMap)
     }
