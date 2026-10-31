@@ -41,12 +41,14 @@ Your phone is calm by default.
 - **Show change, not dashboards.** Before and now, in one line. No streaks and no shame.
 - **Five-minute setup, no computer.**
 
-## Seven ideas
+## Eight ideas
 
 | Idea | Meaning |
 | --- | --- |
-| Essentials | Apps that open in every block: phone, messages, maps, camera, UPI, authenticator |
-| Blocks | The day split into named windows, each with its own apps |
+| Essentials | Apps that open in every block and sit on home: phone, messages, maps, camera, UPI, authenticator |
+| Tempting apps | The apps that pull you in. Only these are held to blocks |
+| Tools | Every other app. Opens any time from search, but stays off home |
+| Blocks | The day split into named windows; each tempting app opens only in the ones you gave it |
 | Time limits | Minutes a tempting app gets inside a block |
 | Pass | Opens one outside app for 10 minutes after a 1-minute wait. One a week |
 | Quiet | Essentials only, now: for the rest of the block or 30, 60 or 90 minutes |

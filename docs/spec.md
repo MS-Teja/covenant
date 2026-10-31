@@ -53,7 +53,7 @@ Ink Tide is the v0.1 theme. Every screen, editors included, belongs to the same 
 | Motion | Rich and fluid but unhurried: springs without overshoot, ink shaders, parallax, textured haptics. Honours Android's Remove animations setting |
 | Opening pause | Ink bloom: a drop spreads from the centre over 3 seconds with "30 min" and "left in Evening", then two words appear: Open and Let go |
 | Voice | Factual and terse: "Instagram opens at 4:00 pm." |
-| Search | Allowed apps only. Outside apps don't exist until their block |
+| Search | Everything that opens right now, tools included. Tempting apps outside their blocks don't exist until then |
 | Seal | Your covenant written out as a short vow ("On weekdays, Work runs 8 to 4…"), then hold for 3 seconds while the seal soaks with ink. It stamps down, slightly askew, with a deep haptic thud |
 | App icon | A seal mark: two rings, one tide line and a point for now. It has a monochrome layer for themed icons, and small sizes keep both rings with heavier strokes |
 | Design frames | [Ink Tide frames](https://claude.ai/artifact/VhFyCPca3LiTX9QEDzWrEy) (private canvas) |
@@ -72,7 +72,9 @@ Use these names in the code and on screen so the two never drift apart.
 | Special day | A date that uses another timeline, such as a holiday or an exam day |
 | Essentials | Apps available in every block |
 | System allowlist | Parts of Android that Covenant never blocks and whose notifications it never holds: phone and in-call screen, the current keyboard, system UI, Settings (except guarded pages), permission dialogs, the package installer, Google Play services dialogs, the file and photo pickers, Contacts, emergency SOS, dialer and alerts, the clock app, the system launcher's recents screen (not its home screen) and Covenant itself. It is an explicit package list, never "any system app": YouTube and Chrome are system apps too |
-| Outside app | Any app not in the current block. It is hidden and blocked |
+| Tempting app | An app you said pulls you in. It opens only in the blocks you gave it, for the minutes you allowed |
+| Tool | Any app that is neither essential nor tempting. It opens any time from search and stays off home unless you pin it to a block |
+| Outside app | A tempting app outside its blocks. It is hidden and blocked |
 | Visit | An app's stay on screen. Leaving it for less than 30 seconds doesn't end the visit |
 | Time limit | Minutes an app gets inside one block |
 | Pass | Opening one outside app for 10 minutes after a 1-minute wait. One a week by default |
@@ -99,12 +101,14 @@ Setup takes about 5 minutes on the phone, with no computer.
 
 1. Install Covenant from the Play Store (over ADB during development).
 2. See where your time went. With usage access, Covenant shows the last 7 days per app and keeps them as your baseline. You can skip this step.
-3. Sort your apps. Covenant suggests essentials (phone, messages, maps, camera, clock, your UPI apps, your authenticator and your password manager) and tempting apps (your top apps by time, plus apps Android lists as social, video, games or news). Everything else stays hidden until you place it.
-4. Pick a starter plan, then adjust it: Evenings (tempting apps 7–9 pm, 45 minutes), Weekends (tempting apps on weekend afternoons) or Strict (tempting apps never). The weekend timeline starts as a copy of the weekday one.
-5. Choose passes: 0, 1 or 2 a week. One is the default.
-6. Grant access: accessibility (after a plain-language disclosure), notification access, notifications, exact alarms, the battery exemption and the home role.
-7. Start. Covenant enforces from here, and stays Unguarded until you seal.
-8. Seal when you're ready: review your covenant as a vow and hold to seal. Calibration week starts, and after 7 days the cooldown takes over.
+3. Pick the apps that pull you in. Covenant pre-ticks your top apps by time and apps Android lists as social, video, games or news. Everything you don't tick stays a tool and opens any time.
+4. Shape your day with a preset (Evenings, After work, Weekends only or Never), which builds the blocks. Times adjust with a time picker, and the weekend timeline starts as a copy of the weekday one.
+5. Say when each tempting app opens and for how long: "Instagram · Evening · 30 min".
+6. Check your essentials: phone, messages, maps, the camera, the clock, your UPI apps, your authenticator and your password manager are pre-ticked.
+7. Make your promise: passes (0, 1 or 2 a week, never daily), the 72-hour cooldown and calibration week.
+8. Grant access: accessibility (after a plain-language disclosure), notification access, notifications, exact alarms and the battery exemption. Then make Covenant the home screen through Android's own dialog.
+9. Start. Covenant enforces from here, and stays Unguarded until you seal.
+10. Seal when you're ready: review your covenant as a vow and hold to seal. Calibration week starts, and after 7 days the cooldown takes over.
 
 Ring-through apps and the cooldown live in Settings. While v0.1 is in development, the phone runs Unguarded and seals once v0.1 passes the test checklist.
 
@@ -133,12 +137,15 @@ Covenant runs these checks whenever a different app comes to the front, so a not
 2. **Guarded settings page:** blocked, unless Covenant opened it to repair a permission.
 3. **The app is in a call or navigating:** opens. Calls and navigation are never cut.
 4. **Essential:** opens, with no checks and no pause.
-5. **Quiet is on:** blocked. Only essentials open until it ends.
+5. **Quiet is on:** blocked, tools included. Only essentials open until it ends.
 6. **A pass is running for this app:** opens, and the pass timer keeps running.
-7. **Not in the current block:** blocked screen, which offers the pass.
-8. **No time limit in this block:** opens.
-9. **No minutes left:** hidden until its next block.
-10. **Otherwise:** the ink bloom, once per visit, then Open or Let go. Warnings come at 5 and 1 minutes left.
+7. **A tool (not tempting):** opens, with no pause.
+8. **Not in the current block:** blocked screen, which offers the pass.
+9. **No time limit in this block:** opens.
+10. **No minutes left:** hidden until its next block.
+11. **Otherwise:** the ink bloom, once per visit, then Open or Let go. Warnings come at 5 and 1 minutes left.
+
+Only real app switches count: dialogs, pop-ups, the keyboard and other apps' overlays don't. A browser tab that an open app starts for a sign-in, payment or help page rides on that app's visit (R60).
 
 If Covenant isn't the home app, blocking falls back to an overlay that offers to restore it (R53).
 
@@ -153,9 +160,9 @@ Each rule has an ID to use in code, commits and tests. Ships in is the milestone
 | R3 | Weekdays and weekends have separate timelines. You choose which days count as weekend. | v0.1 |
 | R4 | The day starts at 4 am, and the date at 4 am decides weekday or weekend. A block still running at 4 am finishes first; the new day's blocks start after it ends. | v0.1 |
 | R5 | A special day swaps in another timeline for one date. A looser one must be set 72 hours ahead; a stricter one applies instantly. | v0.3 |
-| R6 | Only the current block's apps, essentials and the system allowlist are visible and can open. | v0.1 |
+| R6 | Tempting apps open only in their blocks. Essentials, tools and the system allowlist open any time. Home shows essentials and the current block's apps; search finds everything that opens right now. | v0.1 |
 | R7 | Outside apps are blocked from every entry point: home, search, notifications, links, recents, share sheets, split screen, picture-in-picture and bubbles. Closing an app sends you home and blocks re-entry; a picture-in-picture window is dismissed with a gesture. | v0.1 |
-| R8 | A newly installed app belongs to no block. Adding it to one follows the cooldown. | v0.1 |
+| R8 | A newly installed app is a tool until you say otherwise. On first open, Covenant asks once (R59). | v0.1 |
 | R9 | Websites follow their apps: a domain is blocked in browsers whenever its app is outside the block. Adding a domain is instant; removing one follows the cooldown. | v0.3 |
 | R10 | A browser whose address bar Covenant can't read counts as an ordinary app and must be in a block to open. | v0.3 |
 
@@ -172,7 +179,7 @@ Limits count per app per block, and anything held arrives when its app's next bl
 | R15 | At a block boundary, an open app that's leaving gets a 1-minute warning, then closes. Calls and navigation are never cut. | v0.1 |
 | R16 | Grayscale switches on or off with the block, through an Android Modes rule on Android 15 and later, or through secure settings where that permission was granted. | v0.1 |
 | R17 | Notifications from outside apps are held and delivered when that app's next block starts, one summary per app. Covenant mutes notification sound and vibration system-wide and replays them only for allowed apps, so held ones stay silent. A held notification's heads-up may flash for a split second. If Covenant stops, Android's normal sounds return. | v0.1 |
-| R18 | Notifications from apps in no block are dismissed and counted in Held. | v0.1 |
+| R18 | Notifications from a tempting app in no block are dismissed and counted in Held. A tool's notifications always arrive. | v0.1 |
 | R19 | Held shows held notifications as text. It never opens an outside app. | v0.2 |
 | R20 | Calls from apps on the ring-through list ring and open their call screen in every block. Calls from other outside apps are silenced and held. Their messages still wait. | v0.1 |
 | R21 | Audio already playing keeps playing after its app's block ends; only the screen is blocked. | v0.1 |
@@ -241,6 +248,8 @@ Added on Oct 31 for the people in [product.md](product.md).
 | R56 | With usage access, setup reads the last 7 days of time per app and keeps it as the baseline. Without usage access there is no baseline, and today's page shows today's time only. | v0.1 |
 | R57 | Today's page shows time spent in time-limited apps today against the baseline's daily average, and how many times you let go. Home shows neither. | v0.1 |
 | R58 | Nothing is enforced and no notification is held until setup is finished, so a fresh install never blocks the phone it lands on. | v0.1 |
+| R59 | The first time a newly installed app opens, Covenant asks once: tool or temptation. A tool opens from then on. A temptation is held to the blocks and minutes you choose right there, which applies at once because it's stricter than a tool. | v0.1 |
+| R60 | A browser tab (a Custom Tab, an Auth Tab or Firefox's equivalent) that an app open right now starts for a sign-in, payment or help page rides on that app's visit and isn't judged on its own. | v0.1 |
 
 ## Gaps
 
@@ -255,8 +264,8 @@ Every hole found while planning has a rule, a test or a known limit. Safe mode a
 | WhatsApp or Telegram calls outside their block | Ring-through list (R20) |
 | Opening a blocked app's website instead | Websites follow apps (R9, R10) from v0.3. Until then any allowed browser opens every blocked site: accepted |
 | In-app browsers (Instagram, Gmail, Telegram, the Google app) | Known limit: they never follow R9 |
-| Hand-offs from essentials at night (Camera to Photos, a link in Messages, a bank's card check) | Open question below |
-| Installing a new app as a loophole | New apps belong to no block (R8) |
+| Hand-offs from essentials (Camera to Photos, a bank's card check, a sign-in page) | Photos is a tool unless you mark it, and browser tabs ride on the app that opened them (R60) |
+| Installing a new app as a loophole | A new app asks once: tool or temptation (R59). Calling a feed a tool is a choice you make deliberately |
 | Setting the clock forward to reach Evening | Automatic time is switched back on (R38) |
 | Travelling across time zones | Automatic time-zone changes are followed (R38) |
 | A bad first timeline locking you in for 72 hours | Calibration week (R25) |
@@ -304,9 +313,9 @@ Nineteen screens make up v1, and 14 of them ship in v0.1.
 | Home | Current block, its apps, the next block | v0.1 |
 | Today's page | The day's bands and one line against the baseline, one swipe from home | v0.1 |
 | Search | Swipe up to find allowed apps | v0.1 |
-| Timeline list editor | Add, name and time blocks, then drop apps in | v0.1 |
-| Block detail | Apps, time limits and grayscale for one block | v0.1 |
-| Essentials and ring-through | The two always-on lists | v0.1 |
+| Your apps | App first: each tempting app with its blocks and minutes, essentials, pinned tools and ring-through | v0.1 |
+| Your day | Blocks, their times and grayscale, for weekdays and weekends | v0.1 |
+| New app | The one-time question for a new install: tool or temptation, and when it may open | v0.1 |
 | Pending changes | Countdowns, with cancel | v0.1 |
 | Opening pause | The 3-second ink bloom, then Open or Let go | v0.1 |
 | Blocked screen | Why it's blocked, when it opens, and the pass | v0.1 |
@@ -404,8 +413,7 @@ Timing:
 
 None of these block v0.1.
 
-- Which hand-offs from essentials join the allowlist: Photos from Camera, a bank's card check in a browser, the password manager's unlock screen?
-- Which starter plans should setup offer beyond Evenings, Weekends and Strict?
+- Which presets should setup offer beyond Evenings, After work, Weekends only and Never?
 - The name sits close to "Covenant Eyes" (now Victory Shield), a partner-monitoring app in the same space.
 
 ## Sources

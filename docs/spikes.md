@@ -4,7 +4,7 @@ Each spike runs on the Moto Edge 50 Fusion (Android 16) from the throwaway `spik
 
 | # | Spike | What passes | Result |
 | --- | --- | --- | --- |
-| 1 | Payment apps | Paytm, Navi and slice each open and complete a ₹1 payment with a bare accessibility service on. Record any warning, block or "Close all" dialog | — |
+| 1 | Payment apps | Paytm, Navi and slice each open and complete a ₹1 payment with a bare accessibility service on. Record any warning, block or "Close all" dialog | **Pass** (Oct 31): all three paid with Covenant installed over ADB and its accessibility service on. Retest from a Play install |
 | 2 | Install and grants | Installs through ADB and Obtainium without Play Protect blocks. One Shizuku session grants accessibility, notification access, device admin, battery exemption, notifications, the home role and WRITE_SECURE_SETTINGS. Grants survive a reboot. Shizuku's server is gone once debugging is off | — |
 | 3 | Alert ownership | `requestListenerHints(HINT_HOST_DISABLE_NOTIFICATION_EFFECTS)` silences other apps' notifications. Replayed alerts for an allowed app respect ringer mode, Do Not Disturb and the channel's sound and vibration. Calls still ring. Sounds return when the listener dies | — |
 | 4 | Blocking primitives | Window-change latency; `GLOBAL_ACTION_HOME`; a Compose accessibility overlay running the ink-bloom shader; Moto launcher recents (record class names); split screen; dismissing YouTube's PiP with a gesture; bubbles; haptic primitive support | — |
