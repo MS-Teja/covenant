@@ -175,6 +175,7 @@ class CovenantAccessibilityService : AccessibilityService() {
         val start = since ?: return
         val now = Graph.now()
         since = now
+        if (SystemAllowlist.contains(this, app)) return
         val run = Graph.rules().schedule.activeAt(start) ?: return
         val spent = Duration.between(start, now)
         Graph.store.launchUpdate { it.addUsage(UsageKey(AppId(app), run.block.id, run.day), spent) }

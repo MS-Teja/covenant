@@ -1,10 +1,7 @@
 package io.github.msteja.covenant.design
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -21,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -75,17 +73,18 @@ fun InkScreen(
     }
 }
 
+private const val TIDE_DRIFT_MILLIS = 20_000
+
 /** A soft wash of the block's hue with a drifting tide line along its top edge. */
 @Composable
 fun TideWash(hue: Color, modifier: Modifier = Modifier) {
-    val drift by rememberInfiniteTransition(label = "tide").animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(14_000, easing = FastOutSlowInEasing), RepeatMode.Reverse),
-        label = "drift",
-    )
+    // The tide drifts for a while after a screen appears, then settles: fluid, but not a constant redraw.
+    val drift = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        drift.animateTo(1f, tween(TIDE_DRIFT_MILLIS, easing = FastOutSlowInEasing))
+    }
     Canvas(modifier) {
-        val shift = -drift * 50.dp.toPx()
+        val shift = -drift.value * 50.dp.toPx()
         val unit = size.width / 390f
         val crest = 60f * unit
         val wave = Path().apply {
