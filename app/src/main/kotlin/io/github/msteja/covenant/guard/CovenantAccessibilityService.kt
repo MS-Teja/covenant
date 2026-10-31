@@ -12,10 +12,12 @@ import android.os.Handler
 import android.os.Looper
 import android.view.accessibility.AccessibilityEvent
 import io.github.msteja.covenant.Graph
+import io.github.msteja.covenant.MainActivity
 import io.github.msteja.covenant.core.model.AppId
 import io.github.msteja.covenant.core.model.UsageKey
 import io.github.msteja.covenant.core.rules.Access
 import io.github.msteja.covenant.core.rules.warningsAfter
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.Instant
@@ -59,6 +61,8 @@ class CovenantAccessibilityService : AccessibilityService() {
         if (event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
         val packageName = event.packageName?.toString() ?: return
         if (packageName == foreground) return
+        // Covenant's own overlays report window changes too, but they sit over the app rather than replace it.
+        if (packageName == this.packageName && overlays.showing && event.className != MainActivity::class.java.name) return
         leave(foreground)
         foreground = packageName
         since = Graph.now()
@@ -77,8 +81,16 @@ class CovenantAccessibilityService : AccessibilityService() {
     /** Called at block boundaries and other wake-ups: re-judges whatever is on screen now. */
     fun recheck() = handler.post {
         val app = foreground ?: return@post
-        flushUsage(app)
-        if (SystemAllowlist.contains(this, app)) return@post
+        // Judge only once the time spent so far is saved, or a limit that just ran out still looks open.
+        val saved = flushUsage(app)
+        Graph.scope.launch {
+            saved?.join()
+            handler.post { if (foreground == app) judge(app) }
+        }
+    }
+
+    private fun judge(app: String) {
+        if (SystemAllowlist.contains(this, app)) return
         val now = Graph.now()
         val access = Guard.decide(this, AppId(app), now)
         val soon = Guard.decide(this, AppId(app), now.plusSeconds(61))
@@ -171,14 +183,14 @@ class CovenantAccessibilityService : AccessibilityService() {
     }
 
     /** Records on-screen time against the block it was spent in (R11). */
-    private fun flushUsage(app: String) {
-        val start = since ?: return
+    private fun flushUsage(app: String): Job? {
+        val start = since ?: return null
         val now = Graph.now()
         since = now
-        if (SystemAllowlist.contains(this, app)) return
-        val run = Graph.rules().schedule.activeAt(start) ?: return
+        if (SystemAllowlist.contains(this, app)) return null
+        val run = Graph.rules().schedule.activeAt(start) ?: return null
         val spent = Duration.between(start, now)
-        Graph.store.launchUpdate { it.addUsage(UsageKey(AppId(app), run.block.id, run.day), spent) }
+        return Graph.store.launchUpdate { it.addUsage(UsageKey(AppId(app), run.block.id, run.day), spent) }
     }
 
     private fun post(after: Duration, action: () -> Unit) {

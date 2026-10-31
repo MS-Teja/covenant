@@ -6,6 +6,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.Serializer
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -54,15 +55,15 @@ class StateStore(context: Context, private val scope: CoroutineScope) {
 
     init {
         scope.launch {
-            store.data.collect { value ->
-                loaded.value = if (value.createdAt == Instant.EPOCH) value.copy(createdAt = Instant.now()) else value
-            }
+            store.data.collect { loaded.value = it.stamped() }
         }
     }
 
-    suspend fun update(change: (AppState) -> AppState): AppState = store.updateData(change)
+    /** Saves a change; [current] reflects it as soon as this returns. */
+    suspend fun update(change: (AppState) -> AppState): AppState =
+        store.updateData(change).stamped().also { loaded.value = it }
 
-    fun launchUpdate(change: (AppState) -> AppState) {
-        scope.launch { update(change) }
-    }
+    fun launchUpdate(change: (AppState) -> AppState): Job = scope.launch { update(change) }
+
+    private fun AppState.stamped() = if (createdAt == Instant.EPOCH) copy(createdAt = Instant.now()) else this
 }

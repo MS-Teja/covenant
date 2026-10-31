@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -213,7 +214,7 @@ private val limitSteps = listOf<Limit>(Limit.Unlimited) + listOf(10, 15, 20, 30,
 @Composable
 fun BlockDetail(block: Block, onDone: (Block) -> Unit, onRemove: () -> Unit) {
     var draft by remember { mutableStateOf(block) }
-    val apps = Graph.catalog.apps.value
+    val apps by Graph.catalog.apps.collectAsState()
     EditorPage(title = "Block", onBack = { onDone(draft) }) {
         BasicTextField(
             value = draft.name,
@@ -282,7 +283,7 @@ private fun AppLimitRow(app: InstalledApp, limit: Limit?, onToggle: () -> Unit, 
 fun ListsEditor(state: AppState, onBack: () -> Unit) {
     var draft by remember { mutableStateOf(state.commitments.latest) }
     var calls by remember { mutableStateOf(false) }
-    val apps = Graph.catalog.apps.value
+    val apps by Graph.catalog.apps.collectAsState()
     EditorPage(
         title = "Essentials and calls",
         onBack = onBack,

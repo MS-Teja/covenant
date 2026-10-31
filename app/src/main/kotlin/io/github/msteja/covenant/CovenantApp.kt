@@ -47,7 +47,7 @@ object Graph {
     fun init(application: Application) {
         app = application
         store = StateStore(application, scope)
-        catalog = AppCatalog(application)
+        catalog = AppCatalog(application, scope)
     }
 }
 

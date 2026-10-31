@@ -8,9 +8,11 @@ import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
 import io.github.msteja.covenant.core.model.AppId
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.text.Collator
 
 /** An app with a launcher entry, in any of your profiles. */
@@ -21,13 +23,16 @@ data class InstalledApp(
     val user: UserHandle,
 )
 
-/** The apps on the phone, kept current as apps are installed and removed. Work-profile apps included. */
-class AppCatalog(private val context: Context) {
+/**
+ * The apps on the phone, kept current as apps are installed and removed. Work-profile apps included.
+ * Reading every label is slow, so it happens off the main thread; the list is empty until the first read.
+ */
+class AppCatalog(private val context: Context, private val scope: CoroutineScope) {
     private val launcherApps = context.getSystemService(LauncherApps::class.java)
     private val userManager = context.getSystemService(UserManager::class.java)
     private val collator = Collator.getInstance()
 
-    private val _apps = MutableStateFlow(load())
+    private val _apps = MutableStateFlow<List<InstalledApp>>(emptyList())
     val apps: StateFlow<List<InstalledApp>> = _apps.asStateFlow()
 
     private val callback = object : LauncherApps.Callback() {
@@ -40,10 +45,11 @@ class AppCatalog(private val context: Context) {
 
     init {
         launcherApps.registerCallback(callback)
+        refresh()
     }
 
     fun refresh() {
-        _apps.value = load()
+        scope.launch { _apps.value = load() }
     }
 
     fun find(id: AppId): InstalledApp? = _apps.value.firstOrNull { it.id == id }

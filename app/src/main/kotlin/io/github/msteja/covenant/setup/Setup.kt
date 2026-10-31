@@ -12,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,7 +59,7 @@ fun SetupWizard(state: AppState) {
     val context = LocalContext.current
     var step by remember { mutableStateOf(Step.Welcome) }
     var timelineOpen by remember { mutableStateOf(false) }
-    val installed = Graph.catalog.apps.value
+    val installed by Graph.catalog.apps.collectAsState()
     val covenant = state.commitments.latest
 
     fun save(next: Covenant) = Graph.store.launchUpdate {
@@ -156,7 +157,7 @@ fun SetupWizard(state: AppState) {
 
 @Composable
 private fun AppChooser(note: String, chosen: Set<AppId>, onChange: (Set<AppId>) -> Unit) {
-    val apps = Graph.catalog.apps.value
+    val apps by Graph.catalog.apps.collectAsState()
     Column(Modifier.fillMaxWidth()) {
         BasicText(note, Modifier.fillMaxWidth().padding(bottom = 12.dp), style = Type.text(14.sp, Ink.mist, italic = true).copy(textAlign = TextAlign.Center))
         for (app in apps.sortedBy { if (it.id in chosen) 0 else 1 }) {

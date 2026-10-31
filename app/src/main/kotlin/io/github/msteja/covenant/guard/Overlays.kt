@@ -72,6 +72,8 @@ class OverlayHost(private val context: Context) {
     private val windows = context.getSystemService(WindowManager::class.java)
     private val shown = mutableMapOf<String, Pair<View, OverlayOwner>>()
 
+    val showing: Boolean get() = shown.isNotEmpty()
+
     fun show(tag: String, fullScreen: Boolean, content: @Composable (dismiss: () -> Unit) -> Unit) {
         dismiss(tag)
         val owner = OverlayOwner().apply { start() }

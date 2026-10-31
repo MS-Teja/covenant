@@ -142,7 +142,8 @@ fun BlockedScreen(app: AppId, state: AppState, onOpened: () -> Unit, onBack: () 
     val emergencyAt = exits.emergencyAvailableAt(state.activity)
 
     Column(Modifier.fillMaxSize().systemBarsPadding().padding(horizontal = 32.dp, vertical = 28.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        RunningHead(running?.let { "Outside ${it.block.name}" } ?: "Essentials only")
+        // A used-up app still belongs to this block; only a blocked one is outside it.
+        RunningHead(running?.let { if (access is Access.Hidden) it.block.name else "Outside ${it.block.name}" } ?: "Essentials only")
         Column(Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
             BasicText(headline, style = Type.display(31.sp, 340))
             if (note.isNotBlank()) BasicText(note, Modifier.padding(top = 12.dp), style = Type.text(16.sp, Ink.mist, italic = true).copy(textAlign = TextAlign.Center))
