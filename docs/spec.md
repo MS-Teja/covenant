@@ -189,7 +189,7 @@ Stricter changes apply now and looser ones wait out the cooldown; every way out 
 | R23 | Looser changes: adding apps or essentials, raising limits, growing a looser block, turning grayscale off. Also adding ring-through apps, turning on an exit, removing a website block, changing weekend days or the maintenance window. | v0.1 |
 | R24 | Pending changes show a countdown and can be cancelled anytime. | v0.1 |
 | R25 | Calibration week: every change, Release included, applies instantly for the first 7 days after the seal. You can end it early, and it never restarts. | v0.1 |
-| R26 | The cooldown can be lengthened instantly. Shortening it waits out the current cooldown. | v0.1 |
+| R26 | The cooldown can be lengthened instantly. Shortening it waits out the current cooldown. It stays between 72 hours and 7 days. | v0.1 |
 | R27 | Quiet now ends the current block early and keeps you on essentials until the next one. You can never enter a looser block early. | v0.1 |
 | R28 | Focus timer: essentials only, for 25–90 minutes. Only an emergency exit can end it early. | v0.2 |
 | R29 | Borrows: 2 a day, 10 minutes each, after a 1-minute wait. One runs at a time and outlasts a block change. The count resets at 4 am. | v0.1 |
@@ -229,7 +229,7 @@ Both themes draw the same record of clean blocks, and every number stays on the 
 | R45 | Weekly look-back: Ink Tide stacks the week's seven pages; Garden shows the week's growth. | v0.3 |
 | R46 | Home shows the date, the current block and when it ends, its apps centred in large type, essentials in a smaller row, and when the next block starts. | v0.1 |
 | R47 | Gestures: swipe up to search allowed apps, swipe sideways for today's page, swipe down for notifications, double-tap to lock, long-press for Covenant's menu. Double-tap uses accessibility's lock action, which keeps fingerprint unlock working. | v0.1 |
-| R48 | Settings live in DataStore; history and held text live in Room. There is no app-level encryption. Held text is deleted once delivered. History keeps 90 days. | v0.1 |
+| R48 | v0.1 keeps everything in one DataStore file: the covenant, pending changes, today's usage and held text. Room arrives with stats in v0.2, keeping 90 days of history. There is no app-level encryption. Held text is deleted once delivered. | v0.1 |
 | R49 | Export and import the timeline as a file. Importing a looser timeline follows the cooldown. | v0.3 |
 | R50 | No INTERNET permission, analytics or crash SDKs, and backups are off (`allowBackup=false`, data-extraction rules exclude everything). Crash logs stay on the phone and are shared by hand. | v0.1 |
 
@@ -317,11 +317,7 @@ The rule engine sits at the centre and never touches Android, so every rule can 
 | --- | --- |
 | `:core:model` | The vocabulary as types: Block, Timeline, Allowance, PendingChange and the rest. Pure Kotlin |
 | `:core:rules` | The rule engine. Answers what's allowed now, the effective rules (the overlap of current rules and pending changes), the next moment to wake, and how to split a change into now and pending. Pure Kotlin with an injected clock |
-| `:data` | DataStore for settings, the timeline and pending changes; Room for history and held text |
-| `:guard` | Runs in its own process. The accessibility service with its overlays (pause, warnings, blocked screen), the notification listener with the alert replayer, the device-admin receiver, the secure-settings writer, the scheduler (exact alarms, re-armed at boot), the health monitor behind Unguarded, and the coordinator. Enforcement goes through an Enforcer interface: accessibility now, device owner in v0.3 |
-| `:design` | Ink Tide tokens, Literata, motion specs, ink shaders and haptics |
-| `:feature:*` | Home, today's page, search, editors, pending changes, setup, settings |
-| `:app` | Wiring and the home activity |
+| `:app` | Everything Android, in packages. `data`: the state file and the installed-app catalog. `design`: Ink Tide tokens, Literata, the tide wash, grain and ornaments. `home`: home, today's page, search, the blocked screen and the menu. `editor`: timeline, block detail, essentials and ring-through, pending changes, settings. `setup`: the wizard, permissions and the seal. `guard`: the accessibility service with its overlays, the notification listener that owns alert sounds, and the scheduler. Split into modules when it grows |
 
 ## Build order
 
@@ -388,7 +384,6 @@ Timing:
 
 None of these block v0.1.
 
-- Cooldown bounds for R26: the shortest and longest allowed.
 - Can you borrow an app whose limit ran out, or an app in no block (R8)?
 - Partner codes: printed codes are shown to you first. Consider counter-based codes that live only in the partner's authenticator app.
 - Which hand-offs from essentials join the allowlist: Photos from Camera, a bank's card check in a browser, the password manager's unlock screen?

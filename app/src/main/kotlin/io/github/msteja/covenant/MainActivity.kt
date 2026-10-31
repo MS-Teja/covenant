@@ -43,6 +43,14 @@ import java.time.LocalTime
 class MainActivity : ComponentActivity() {
     private var screen by mutableStateOf<Screen>(Screen.Home)
 
+    /** When the blocked screen last appeared; Android's Home intents that follow it are echoes. */
+    private var blockedShownAt = 0L
+
+    private fun showBlocked(app: AppId) {
+        screen = Screen.Blocked(app)
+        blockedShownAt = android.os.SystemClock.uptimeMillis()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(SystemBarStyle.dark(android.graphics.Color.TRANSPARENT), SystemBarStyle.dark(android.graphics.Color.TRANSPARENT))
         super.onCreate(savedInstanceState)
@@ -56,9 +64,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        // Pressing Home while already home returns to the first page, unless the guard just sent you here.
+        val echo = android.os.SystemClock.uptimeMillis() - blockedShownAt < 1500
+        if (intent.hasCategory(Intent.CATEGORY_HOME) && Graph.blocked.value == null && !echo) screen = Screen.Home
         handle(intent)
-        // Pressing Home while already home returns to the first page.
-        if (intent.getStringExtra(EXTRA_BLOCKED) == null && intent.hasCategory(Intent.CATEGORY_HOME)) screen = Screen.Home
     }
 
     override fun onResume() {
@@ -68,7 +77,11 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handle(intent: Intent?) {
-        intent?.getStringExtra(EXTRA_BLOCKED)?.let { screen = Screen.Blocked(AppId(it)) }
+        intent?.getStringExtra(EXTRA_BLOCKED)?.let { showBlocked(AppId(it)) }
+        Graph.blocked.value?.let {
+            Graph.blocked.value = null
+            showBlocked(it)
+        }
     }
 
     @Composable
@@ -77,6 +90,13 @@ class MainActivity : ComponentActivity() {
         val now = rememberNow()
         val apps by Graph.catalog.apps.collectAsState()
         val hue = hueAt(LocalTime.now())
+        val blocked by Graph.blocked.collectAsState()
+        LaunchedEffect(blocked) {
+            blocked?.let {
+                Graph.blocked.value = null
+                showBlocked(it)
+            }
+        }
         InkScreen(hue = hue) {
             if (!state.setupDone) {
                 SetupWizard(state)

@@ -74,7 +74,8 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Spacer(Modifier.height(24.dp))
-                val big = view.apps.ifEmpty { if (view.chapter == "Essentials only" || view.chapter == "Quiet") view.essentials else emptyList() }
+                // A block with no apps of its own (Night, quiet now) shows the essentials as its list.
+                val big = view.apps.ifEmpty { view.essentials }
                 for (app in big) {
                     BasicText(
                         app.label,

@@ -25,6 +25,9 @@ object Graph {
         private set
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
+    /** An app the guard just turned away; home shows the blocked screen for it. */
+    val blocked = kotlinx.coroutines.flow.MutableStateFlow<io.github.msteja.covenant.core.model.AppId?>(null)
+
     val zone: ZoneId get() = ZoneId.systemDefault()
     fun now(): Instant = Instant.now()
 

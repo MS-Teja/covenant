@@ -12,7 +12,6 @@ import android.os.Handler
 import android.os.Looper
 import android.view.accessibility.AccessibilityEvent
 import io.github.msteja.covenant.Graph
-import io.github.msteja.covenant.MainActivity
 import io.github.msteja.covenant.core.model.AppId
 import io.github.msteja.covenant.core.model.UsageKey
 import io.github.msteja.covenant.core.rules.Access
@@ -158,12 +157,9 @@ class CovenantAccessibilityService : AccessibilityService() {
         cancelTimers()
         overlays.dismissAll()
         releaseAudio()
+        // Home reads the blocked app from here, whichever arrives first: this or the Home intent.
+        Graph.blocked.value = AppId(app)
         performGlobalAction(GLOBAL_ACTION_HOME)
-        startActivity(
-            Intent(this, MainActivity::class.java)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                .putExtra(MainActivity.EXTRA_BLOCKED, app),
-        )
     }
 
     private fun leave(app: String?) {
