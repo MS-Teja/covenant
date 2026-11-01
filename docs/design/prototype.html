@@ -12,10 +12,9 @@
 @font-face { font-family: 'Literata App'; src: url('../../app/src/main/res/font/literata.ttf') format('truetype'); font-weight: 200 900; font-style: normal; }
 @font-face { font-family: 'Literata App'; src: url('../../app/src/main/res/font/literata_italic.ttf') format('truetype'); font-weight: 200 900; font-style: italic; }
 :root {
-  --ground: #0A0E14; --lift: #101722; --card: #111926; --raised: #162030;
-  --bone: #D8DEE6; --bright: #E6EBF1; --mist: #A9B4C2; --slate: #8B96A5; --dim: #748091;
-  --orn: #4A5566; --hair: #1E2735; --line: #2A3444; --tide: #6FA8C9;
-  --hue: #B8875A;
+  --ground: #0A0E14; --lift: #101722; --card: #111926; --raised: #172131;
+  --bone: #D8DEE6; --bright: #EEF2F6; --mist: #A9B4C2; --slate: #8B96A5; --dim: #748091;
+  --orn: #4A5566; --hair: #1C2533; --line: #2A3444; --tide: #6FA8C9;
   --serif: 'Literata App', 'Literata', Georgia, serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,7 +30,7 @@ button { font-family: inherit; color: inherit; }
 .guide { width: 250px; flex: none; padding-top: 8px; }
 .guide h1 { font-size: 22px; font-weight: 400; font-variation-settings: 'opsz' 36; }
 .guide p { color: var(--dim); font-size: 13px; line-height: 1.5; margin: 6px 0 18px; font-style: italic; }
-.guide h2 { font-size: 12px; color: var(--slate); font-variant-caps: all-small-caps; letter-spacing: .14em; font-weight: 500; margin: 16px 0 4px; font-size: 14px; }
+.guide h2 { color: var(--slate); font-variant-caps: all-small-caps; letter-spacing: .14em; font-weight: 500; margin: 16px 0 4px; font-size: 14px; }
 .guide a { display: block; color: var(--mist); text-decoration: none; font-size: 14px; padding: 4px 8px; border-radius: 8px; cursor: pointer; }
 .guide a:hover { background: #0F1520; color: var(--bright); }
 .guide a.on { background: #131B28; color: var(--bright); }
@@ -45,14 +44,17 @@ button { font-family: inherit; color: inherit; }
 .stage { flex: none; transform-origin: top center; }
 .phone {
   position: relative; width: 392px; height: 852px; border-radius: 50px; overflow: hidden;
-  background: radial-gradient(1200px 900px at 50% -10%, var(--lift), var(--ground) 60%);
+  background: var(--ground);
   border: 10px solid #161B23; box-shadow: 0 40px 120px rgba(0,0,0,.6), 0 0 0 1px #262D38;
 }
 .status { position: absolute; top: 0; left: 0; right: 0; height: 40px; display: flex; align-items: center; justify-content: space-between; padding: 6px 30px 0; font-size: 13px; color: var(--mist); z-index: 30; pointer-events: none; font-variant-numeric: tabular-nums; }
 .navpill { position: absolute; bottom: 8px; left: 50%; width: 120px; height: 4px; margin-left: -60px; border-radius: 2px; background: #5A6576; z-index: 30; }
-.grain { position: absolute; inset: 0; pointer-events: none; opacity: .09; z-index: 25; mix-blend-mode: overlay;
+.grain { position: absolute; inset: 0; pointer-events: none; opacity: .08; z-index: 25; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
-.tide { position: absolute; left: 0; right: 0; bottom: 0; height: 230px; pointer-events: none; z-index: 0; }
+/* The block's hue is light falling from the top edge, never a band behind text. */
+.glow { position: absolute; left: -30%; right: -30%; top: -260px; height: 620px; pointer-events: none; z-index: 0;
+  background: radial-gradient(closest-side, rgba(192,138,78,.24), rgba(192,138,78,.07) 55%, rgba(192,138,78,0)); }
+.glow.day { background: radial-gradient(closest-side, rgba(183,174,147,.20), rgba(183,174,147,.06) 55%, rgba(183,174,147,0)); }
 
 .screen { position: absolute; inset: 0; display: none; flex-direction: column; padding: 52px 24px 30px; overflow-y: auto; scrollbar-width: none; }
 .screen::-webkit-scrollbar { display: none; }
@@ -64,6 +66,7 @@ button { font-family: inherit; color: inherit; }
 /* Type */
 .caps { font-variant-caps: all-small-caps; letter-spacing: .14em; color: var(--slate); font-size: 15px; }
 .title { font-size: 30px; line-height: 1.16; font-weight: 380; font-variation-settings: 'opsz' 36; letter-spacing: -.01em; color: var(--bright); }
+.largetitle { font-size: 32px; line-height: 1.15; font-weight: 400; font-variation-settings: 'opsz' 40; letter-spacing: -.012em; color: var(--bright); margin: 2px 0 18px; }
 .lede { font-size: 16px; line-height: 1.5; color: var(--mist); margin-top: 10px; }
 .note { font-size: 14px; line-height: 1.45; color: var(--dim); font-style: italic; }
 .center { text-align: center; }
@@ -74,11 +77,12 @@ button { font-family: inherit; color: inherit; }
 .btn:active { transform: scale(.985); }
 .btn.primary { background: var(--bone); color: var(--ground); }
 .btn.primary:hover { background: var(--bright); }
-.btn.secondary { background: transparent; border: 1px solid var(--line); color: var(--bone); }
+.btn.secondary { background: var(--card); border: 1px solid var(--hair); color: var(--bone); }
 .btn.text { background: none; color: var(--mist); height: 46px; font-size: 15px; font-weight: 400; }
 .btn.danger { background: none; color: #D59A8E; height: 46px; font-size: 15px; font-weight: 400; }
-.btn[disabled] { opacity: .35; pointer-events: none; }
+.btn small { font-size: 13px; font-weight: 400; opacity: .7; font-style: italic; }
 .actions { display: flex; flex-direction: column; gap: 6px; margin-top: 20px; }
+
 /* Long screens scroll their body; the main action stays put at the bottom. */
 .screen.docked { overflow: hidden; padding-bottom: 0; }
 .scroll { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; margin: 0 -24px; padding: 0 24px 14px; display: flex; flex-direction: column; }
@@ -86,34 +90,34 @@ button { font-family: inherit; color: inherit; }
 .scroll > * { flex-shrink: 0; }
 .actions.dock { margin: 0 -24px; padding: 12px 24px 30px; }
 .actions.dock::before { content: ''; position: absolute; left: 0; right: 0; top: -22px; height: 22px; background: linear-gradient(rgba(10,14,20,0), var(--ground)); pointer-events: none; }
-.group { background: var(--card); border: 1px solid var(--hair); border-radius: 20px; padding: 0 16px; }
-.btn small { font-size: 13px; font-weight: 400; opacity: .7; font-style: italic; }
 
-.topbar { display: flex; align-items: center; height: 44px; margin: 0 -10px 6px; }
-.topbar .back { width: 44px; height: 44px; display: grid; place-items: center; cursor: pointer; border-radius: 22px; }
+.topbar { display: flex; align-items: center; height: 44px; margin: 0 -10px 4px; }
+.topbar .back { width: 44px; height: 44px; display: grid; place-items: center; cursor: pointer; border-radius: 22px; color: var(--bone); }
 .topbar .back svg { width: 22px; height: 22px; }
 .topbar .back:hover { background: #121A26; }
-.topbar .caps { flex: 1; text-align: center; margin-right: 44px; }
+.topbar .step { margin-left: auto; margin-right: 10px; font-size: 14px; color: var(--dim); font-variant-numeric: tabular-nums; }
 
-.search { display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 14px; border-radius: 23px; background: #0F1621; border: 1px solid var(--hair); color: var(--dim); font-size: 16px; margin: 4px 0 10px; }
+.search { display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 14px; border-radius: 14px; background: #121A26; color: var(--dim); font-size: 16px; margin: 4px 0 10px; }
 .search svg { width: 18px; height: 18px; flex: none; }
 .search input { background: none; border: 0; outline: 0; color: var(--bright); font: inherit; width: 100%; }
 
-.section { margin: 18px 0 4px; }
+.section { margin: 22px 4px 8px; }
 .list { display: flex; flex-direction: column; }
-.row { display: flex; align-items: center; gap: 14px; min-height: 60px; padding: 8px 2px; border-bottom: 1px solid var(--hair); cursor: pointer; }
+.group { background: var(--card); border-radius: 18px; padding: 0 16px; }
+.group + .note { margin: 8px 4px 0; }
+.row { display: flex; align-items: center; gap: 14px; min-height: 56px; padding: 8px 0; border-bottom: 1px solid var(--hair); cursor: pointer; }
 .row:last-child { border-bottom: 0; }
 .row .text { flex: 1; min-width: 0; }
 .row .name { font-size: 17px; color: var(--bone); font-variation-settings: 'opsz' 16; }
 .row .meta { font-size: 13px; color: var(--dim); font-style: italic; margin-top: 1px; }
-.row .value { font-size: 15px; color: var(--mist); font-style: italic; white-space: nowrap; }
+.row .value { font-size: 15px; color: var(--slate); white-space: nowrap; }
 .chev { width: 16px; height: 16px; color: var(--orn); flex: none; }
-.icon { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 17px; font-weight: 640; color: #0B0F15; flex: none; font-variation-settings: 'opsz' 24; }
-.icon.lg { width: 56px; height: 56px; border-radius: 16px; font-size: 24px; }
+.icon { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; font-size: 16px; font-weight: 640; color: #0B0F15; flex: none; font-variation-settings: 'opsz' 24; }
+.icon.lg { width: 60px; height: 60px; border-radius: 17px; font-size: 26px; }
 .check { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--orn); display: grid; place-items: center; flex: none; transition: .15s; }
 .row.on .check { background: var(--bone); border-color: var(--bone); }
 .row.on .check::after { content: ''; width: 10px; height: 5px; border-left: 2px solid var(--ground); border-bottom: 2px solid var(--ground); transform: translateY(-1px) rotate(-45deg); }
-.row:not(.on) .name { color: var(--mist); }
+.row[data-toggle]:not(.on) .name, .row[data-pick]:not(.on) .name { color: var(--mist); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { height: 38px; padding: 0 15px; border-radius: 19px; border: 1px solid var(--line); background: transparent; color: var(--mist); font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: .15s; }
@@ -121,7 +125,7 @@ button { font-family: inherit; color: inherit; }
 .chip.on { background: var(--bone); border-color: var(--bone); color: var(--ground); }
 .chip small { font-size: 12px; opacity: .7; font-style: italic; }
 
-.card { background: var(--card); border: 1px solid var(--hair); border-radius: 20px; padding: 16px 18px; }
+.card { background: var(--card); border: 1px solid transparent; border-radius: 18px; padding: 16px 18px; }
 .card + .card { margin-top: 10px; }
 .card.pick { cursor: pointer; display: flex; gap: 14px; align-items: flex-start; }
 .card.pick.on { border-color: var(--bone); background: var(--raised); }
@@ -131,25 +135,26 @@ button { font-family: inherit; color: inherit; }
 .card h3 { font-size: 18px; font-weight: 420; color: var(--bright); font-variation-settings: 'opsz' 20; }
 .card p { font-size: 14px; color: var(--dim); font-style: italic; margin-top: 2px; line-height: 1.4; }
 
-.seg { display: flex; background: #0D141E; border: 1px solid var(--hair); border-radius: 15px; padding: 3px; }
-.seg button { flex: 1; height: 38px; border-radius: 12px; border: 0; background: none; color: var(--mist); font-size: 15px; cursor: pointer; }
-.seg button.on { background: #1D2635; color: var(--bright); }
+.seg { display: flex; background: #0D141E; border-radius: 13px; padding: 3px; }
+.seg button { flex: 1; height: 36px; border-radius: 10px; border: 0; background: none; color: var(--mist); font-size: 15px; cursor: pointer; }
+.seg button.on { background: #222C3B; color: var(--bright); }
 
 .switch { width: 48px; height: 28px; border-radius: 14px; background: #253041; position: relative; flex: none; cursor: pointer; transition: .2s; }
 .switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--slate); transition: .2s; }
 .switch.on { background: var(--tide); }
 .switch.on::after { left: 23px; background: var(--bright); }
 
-.status-on { color: var(--tide); font-size: 15px; font-style: italic; display: inline-flex; align-items: center; gap: 6px; }
-.pill-btn { height: 36px; padding: 0 16px; border-radius: 18px; border: 0; background: var(--bone); color: var(--ground); font-size: 14px; font-weight: 500; cursor: pointer; }
+.status-on { color: var(--tide); font-size: 15px; display: inline-flex; align-items: center; gap: 6px; }
+.pill-btn { height: 34px; padding: 0 16px; border-radius: 17px; border: 0; background: var(--bone); color: var(--ground); font-size: 14px; font-weight: 500; cursor: pointer; }
 
 /* Sheets */
-.scrim { position: absolute; inset: 0; background: rgba(2,4,7,.66); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 20; }
+.scrim { position: absolute; inset: 0; background: rgba(2,4,7,.62); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 20; }
 .scrim.on { opacity: 1; pointer-events: auto; }
-.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 21; background: #111926; border-top: 1px solid #243042; border-radius: 28px 28px 0 0; padding: 10px 24px 30px; max-height: 90%; overflow-y: auto; transform: translateY(102%); transition: transform .34s cubic-bezier(.2,.8,.2,1); scrollbar-width: none; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 21; background: #121A27; border-radius: 28px 28px 0 0; padding: 10px 24px 30px; max-height: 90%; overflow-y: auto; transform: translateY(102%); transition: transform .34s cubic-bezier(.2,.8,.2,1); scrollbar-width: none; }
 .sheet.on { transform: none; }
-.grabber { width: 40px; height: 4px; border-radius: 2px; background: #2F3A4A; margin: 0 auto 18px; }
+.grabber { width: 38px; height: 4px; border-radius: 2px; background: #2F3A4A; margin: 0 auto 18px; }
 .sheet .label { font-size: 14px; color: var(--slate); font-variant-caps: all-small-caps; letter-spacing: .14em; margin: 20px 0 10px; }
+.sheet .sheettitle { font-size: 24px; color: var(--bright); font-variation-settings: 'opsz' 30; }
 
 /* Wheel time picker */
 .wheel { display: flex; justify-content: center; gap: 4px; position: relative; height: 200px; margin: 6px 0 4px; }
@@ -159,41 +164,49 @@ button { font-family: inherit; color: inherit; }
 .wheel .col div { height: 40px; display: grid; place-items: center; scroll-snap-align: center; font-size: 22px; color: var(--mist); font-variant-numeric: tabular-nums; }
 .wheel .col .pad { scroll-snap-align: none; }
 
-/* Home */
+/* Home: one quiet page. The status bar already shows the time and the date lives on today's page. */
 .home-head { text-align: center; }
-.home-head .until { font-size: 16px; color: var(--mist); font-style: italic; margin-top: 2px; }
-.chapter { font-size: 28px; font-weight: 420; font-variation-settings: 'opsz' 36; color: var(--bright); margin-top: 36px; }
-.big { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.big a { font-size: 38px; font-weight: 330; font-variation-settings: 'opsz' 48; color: var(--bone); padding: 6px 20px; cursor: pointer; text-decoration: none; letter-spacing: -.01em; }
+.chapter { font-size: 17px; color: var(--mist); font-variant-caps: all-small-caps; letter-spacing: .18em; }
+.until { font-size: 15px; color: var(--dim); font-style: italic; margin-top: 2px; }
+.big { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 26px; }
+.big a { font-size: 38px; font-weight: 330; font-variation-settings: 'opsz' 48; color: var(--bright); padding: 6px 20px; cursor: pointer; letter-spacing: -.012em; }
 .big a:active { opacity: .55; }
-.essentials { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 14px; max-width: 300px; margin: 0 auto; }
-.essentials a { font-variant-caps: all-small-caps; letter-spacing: .14em; color: var(--mist); font-size: 16px; padding: 8px 0; cursor: pointer; }
-.ornament { display: block; margin: 0 auto 10px; width: 30px; height: 8px; }
-.home-next { font-size: 15px; font-style: italic; color: var(--mist); text-align: center; margin-top: 14px; }
-.strip { display: flex; justify-content: center; gap: 26px; margin-top: 18px; }
-.strip a { font-variant-caps: all-small-caps; letter-spacing: .16em; font-size: 15px; color: var(--slate); cursor: pointer; padding: 6px 2px; }
-.strip a:hover { color: var(--bright); }
+.big a .left { font-size: 14px; color: var(--dim); font-style: italic; margin-left: 8px; vertical-align: middle; letter-spacing: 0; font-variation-settings: 'opsz' 12; }
+.essentials { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 18px; max-width: 300px; margin: 30px auto 0; }
+.essentials a { font-size: 16px; color: var(--slate); padding: 8px 0; cursor: pointer; }
+.essentials a:hover { color: var(--bright); }
+.homebar { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.searchpill { flex: 1; height: 46px; border-radius: 23px; background: rgba(22,30,44,.82); display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--mist); font-size: 16px; cursor: pointer; }
+.searchpill svg { width: 17px; height: 17px; }
+.roundbtn { width: 46px; height: 46px; border-radius: 23px; background: rgba(22,30,44,.82); display: grid; place-items: center; cursor: pointer; }
+.roundbtn svg { width: 22px; height: 22px; }
+.dots { display: flex; justify-content: center; gap: 7px; margin-top: 18px; }
+.dots i { width: 6px; height: 6px; border-radius: 3px; background: #3A4555; cursor: pointer; }
+.dots i.on { background: var(--mist); }
 
 /* Today */
-.ribbon { display: grid; grid-template-columns: 44px 1fr; gap: 0 12px; margin-top: 18px; }
-.hours { display: flex; flex-direction: column; justify-content: space-between; font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; padding: 2px 0; }
-.bands { display: flex; flex-direction: column; gap: 6px; }
-.band { border-radius: 14px; padding: 10px 14px; position: relative; overflow: hidden; display: flex; justify-content: space-between; align-items: baseline; }
+.ribbon { display: grid; grid-template-columns: 52px 1fr; gap: 0 12px; margin-top: 8px; }
+.hours { position: relative; font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.hours span { position: absolute; left: 0; transform: translateY(-50%); }
+.bands { display: flex; flex-direction: column; gap: 5px; }
+.band { border-radius: 14px; padding: 9px 14px; position: relative; overflow: hidden; display: flex; justify-content: space-between; align-items: baseline; }
 .band b { font-weight: 420; font-size: 16px; color: #0C1118; }
-.band span { font-size: 12px; font-variant-caps: all-small-caps; letter-spacing: .14em; color: rgba(12,17,24,.7); }
-.band.faint { opacity: .28; }
+.band span { font-size: 13px; color: rgba(12,17,24,.72); font-style: italic; }
+.band.faint { opacity: .26; }
 .band.now::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--bright); }
-.band .ripple { position: absolute; right: 26%; top: 50%; width: 40px; height: 14px; margin: -7px -20px; border: 1.5px solid rgba(12,17,24,.55); border-radius: 50%; animation: ripple 2.6s infinite ease-out; }
+.band .ripple { position: absolute; right: 30%; top: 55%; width: 40px; height: 14px; margin: -7px -20px; border: 1.5px solid rgba(12,17,24,.55); border-radius: 50%; animation: ripple 2.6s infinite ease-out; }
 .band .ripple.r2 { animation-delay: .86s; }
 .band .ripple.r3 { animation-delay: 1.72s; }
 @keyframes ripple { from { transform: scale(.3); opacity: .9; } to { transform: scale(2.2); opacity: 0; } }
-.sum { font-size: 17px; line-height: 1.5; color: var(--bone); text-align: center; margin-top: 22px; font-style: italic; }
-.sum b { font-style: normal; font-weight: 500; color: var(--bright); }
+.stats { display: flex; gap: 10px; margin-top: 16px; }
+.stat { flex: 1; background: var(--card); border-radius: 16px; padding: 12px 14px; }
+.stat .v { font-size: 24px; color: var(--bright); font-variation-settings: 'opsz' 30; font-variant-numeric: tabular-nums; }
+.stat .k { font-size: 13px; color: var(--dim); font-style: italic; }
 
 /* Pause */
 #s-pause { background: var(--ground); align-items: center; justify-content: center; padding: 0 28px; overflow: hidden; }
 .bloom { position: absolute; left: 50%; top: 46%; width: 980px; height: 980px; margin: -490px 0 0 -490px; border-radius: 50%;
-  background: radial-gradient(circle, #22344E 0%, rgba(25,41,64,.94) 50%, rgba(184,135,90,.18) 82%, transparent 100%);
+  background: radial-gradient(circle, #22344E 0%, rgba(25,41,64,.94) 50%, rgba(192,138,78,.18) 82%, transparent 100%);
   transform: scale(.03); z-index: 0 !important; }
 .bloom.go { animation: bloom 2.6s cubic-bezier(.22,.7,.2,1) forwards; }
 @keyframes bloom { to { transform: scale(1); } }
@@ -207,19 +220,18 @@ button { font-family: inherit; color: inherit; }
 @keyframes fade { to { opacity: 1; } }
 @keyframes rise { to { opacity: 1; transform: none; } }
 
-/* Blocked */
 .wait { text-align: center; }
 .wait .t { font-size: 40px; font-weight: 320; font-variant-numeric: tabular-nums; color: var(--bright); font-variation-settings: 'opsz' 48; }
-
 .seal { width: 92px; height: 92px; margin: 0 auto; display: block; }
-.ribbon-mini { display: flex; height: 34px; border-radius: 10px; overflow: hidden; margin: 14px 0 6px; }
+.ribbon-mini { display: flex; height: 30px; border-radius: 9px; overflow: hidden; margin: 16px 0 6px; gap: 2px; }
 .ribbon-mini div { height: 100%; }
-.ribbon-mini + .scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
-
-.bars .bar { height: 4px; border-radius: 2px; background: var(--hue); margin-top: 6px; opacity: .85; }
-.total { text-align: center; margin: 18px 0 4px; }
+.scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.bars .bar { height: 4px; border-radius: 2px; background: #C08A4E; margin-top: 6px; opacity: .8; }
+.total { text-align: center; margin: 12px 0 10px; }
 .total .t { font-size: 44px; font-weight: 320; font-variation-settings: 'opsz' 48; color: var(--bright); font-variant-numeric: tabular-nums; }
-.disclosure { font-size: 14px; line-height: 1.5; color: var(--mist); background: #0D141E; border: 1px solid var(--hair); border-radius: 14px; padding: 12px 14px; margin-top: 10px; }
+.disclosure { font-size: 14px; line-height: 1.5; color: var(--mist); background: #0D141E; border-radius: 12px; padding: 12px 14px; margin-top: 12px; }
+.domain { font-size: 17px; color: var(--bone); font-variant-numeric: tabular-nums; }
+.lock { font-size: 13px; color: var(--dim); font-style: italic; }
 </style>
 </head>
 <body>
@@ -228,20 +240,21 @@ button { font-family: inherit; color: inherit; }
   <h1>Covenant</h1>
   <p>A clickable prototype of the rebuilt onboarding and screens. Tap through inside the phone, or jump from here.</p>
   <h2>Onboarding</h2>
-  <a data-go="welcome">1 · Welcome</a>
-  <a data-go="mirror">2 · Where your time went</a>
-  <a data-go="pull">3 · Apps that pull you in</a>
-  <a data-go="day">4 · Your day</a>
-  <a data-go="when">5 · When each app opens</a>
-  <a data-go="essentials">6 · Essentials</a>
+  <a data-go="welcome">Welcome</a>
+  <a data-go="mirror">1 · Where your time went</a>
+  <a data-go="pull">2 · Apps that pull you in</a>
+  <a data-go="day">3 · Your day</a>
+  <a data-go="when">4 · When each app opens</a>
+  <a data-go="essentials">5 · Essentials</a>
+  <a data-go="sites">6 · Websites</a>
   <a data-go="promise">7 · Your promise</a>
   <a data-go="access">8 · Access</a>
   <a data-go="homeset">9 · Home screen</a>
-  <a data-go="done">10 · Done</a>
+  <a data-go="done">Done</a>
   <h2>Every day</h2>
   <a data-go="home">Home · Evening</a>
   <a data-go="homeday">Home · Day</a>
-  <a data-go="today">Today's page</a>
+  <a data-go="today">Today</a>
   <a data-go="search">Search</a>
   <a data-go="menu">Covenant menu</a>
   <h2>Editing</h2>
@@ -249,10 +262,12 @@ button { font-family: inherit; color: inherit; }
   <a data-go="apps" data-sheet="app">Your apps · one app</a>
   <a data-go="dayedit">Your day</a>
   <a data-go="dayedit" data-sheet="block">Your day · one block</a>
+  <a data-go="websites">Websites</a>
   <a data-go="settings">Settings</a>
   <h2>Moments</h2>
   <a data-go="pause">The pause</a>
-  <a data-go="blocked">Blocked</a>
+  <a data-go="blocked">Blocked app</a>
+  <a data-go="siteblocked">Blocked website</a>
   <a data-go="menu" data-sheet="pass">Use a pass</a>
   <a data-go="menu" data-sheet="quiet">Quiet</a>
   <a data-go="newapp">A new app</a>
@@ -261,18 +276,14 @@ button { font-family: inherit; color: inherit; }
 <main class="stage" id="stage">
 <div class="phone" id="phone">
   <div class="status"><span class="num" id="clock">7:40</span><span>●●● ▮</span></div>
-  <svg class="tide" viewBox="0 0 390 230" preserveAspectRatio="none" aria-hidden="true">
-    <defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B8875A" stop-opacity=".05"/><stop offset="1" stop-color="#B8875A" stop-opacity=".12"/></linearGradient></defs>
-    <path d="M-60 64 C5 46 70 46 135 60 C200 74 265 80 330 58 C380 42 430 44 470 56 L470 230 L-60 230 Z" fill="url(#tg)"/>
-    <path d="M-60 64 C5 46 70 46 135 60 C200 74 265 80 330 58 C380 42 430 44 470 56" fill="none" stroke="#B8875A" stroke-opacity=".28" stroke-width="1"/>
-  </svg>
+  <div class="glow" id="glow"></div>
 
-  <!-- 1 Welcome -->
-  <section class="screen" id="s-welcome" data-tide>
+  <!-- Welcome -->
+  <section class="screen" id="s-welcome" data-glow>
     <div class="grow"></div>
     <svg class="seal" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="40" fill="none" stroke="#D8DEE6" stroke-width="2.4"/><circle cx="50" cy="50" r="31" fill="none" stroke="#D8DEE6" stroke-width="1.6"/><path d="M24 54 C32 46 40 46 48 52 C56 58 64 58 76 48" fill="none" stroke="#6FA8C9" stroke-width="2.4" stroke-linecap="round"/><circle cx="62" cy="40" r="3" fill="#D8DEE6"/></svg>
     <h1 class="title center" style="margin-top:28px">Make your phone<br>calm again.</h1>
-    <p class="lede center">Calls, payments, maps and messages always work. The apps that pull you in open only when you planned, for the minutes you allowed.</p>
+    <p class="lede center">Calls, payments and maps always work. The apps that pull you in open only when you planned.</p>
     <div class="grow"></div>
     <div class="actions">
       <button class="btn primary" data-go="mirror">Begin</button>
@@ -280,17 +291,14 @@ button { font-family: inherit; color: inherit; }
     </div>
   </section>
 
-  <!-- 2 Mirror -->
+  <!-- 1 Mirror -->
   <section class="screen" id="s-mirror">
-    <div class="topbar"><a class="back" data-go="welcome"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="caps">step 1 of 8</span></div>
+    <div class="topbar"><a class="back" data-go="welcome"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="step">1 of 9</span></div>
     <h1 class="title">Where your time went</h1>
-    <div id="mirror-ask">
-      <p class="lede">Covenant can show your last 7 days per app, and remember them so you can see what changes. It stays on your phone.</p>
-      <div class="grow"></div>
-    </div>
+    <div id="mirror-ask"><p class="lede">See your last 7 days per app, so you can tell what changes. It stays on your phone.</p></div>
     <div id="mirror-list" style="display:none">
-      <div class="total"><div class="t">6 h 35 min</div><p class="note">a day on your phone, last week</p></div>
-      <div class="list bars" id="mirror-rows"></div>
+      <div class="total"><div class="t">6 h 35 min</div><p class="note">a day, last week</p></div>
+      <div class="group bars" id="mirror-rows"></div>
     </div>
     <div class="grow"></div>
     <div class="actions dock" id="mirror-actions-ask">
@@ -302,291 +310,319 @@ button { font-family: inherit; color: inherit; }
     </div>
   </section>
 
-  <!-- 3 Pull you in -->
+  <!-- 2 Pull you in -->
   <section class="screen" id="s-pull">
-    <div class="topbar"><a class="back" data-go="mirror"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="caps">step 2 of 8</span></div>
+    <div class="topbar"><a class="back" data-go="mirror"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="step">2 of 9</span></div>
     <h1 class="title">Which apps pull you in?</h1>
-    <p class="lede">These open only when you plan. Everything you leave unticked opens any time.</p>
+    <p class="lede">These open only when you plan. The rest open any time.</p>
     <div class="search" style="margin-top:16px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input placeholder="Search apps"></div>
     <div class="caps section">Suggested</div>
-    <div class="list" id="pull-suggested"></div>
+    <div class="group" id="pull-suggested"></div>
     <div class="caps section">All apps</div>
-    <div class="list" id="pull-all"></div>
-    <div class="actions dock">
-      <button class="btn primary" data-go="day" id="pull-next">Continue · 5 apps</button>
-    </div>
+    <div class="group" id="pull-all"></div>
+    <div class="actions dock"><button class="btn primary" data-go="day" id="pull-next">Continue · 5 apps</button></div>
   </section>
 
-  <!-- 4 Your day -->
+  <!-- 3 Your day -->
   <section class="screen" id="s-day">
-    <div class="topbar"><a class="back" data-go="pull"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="caps">step 3 of 8</span></div>
+    <div class="topbar"><a class="back" data-go="pull"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="step">3 of 9</span></div>
     <h1 class="title">When should they open?</h1>
-    <p class="lede">Pick a shape for your day. You can fine-tune it.</p>
     <div style="margin-top:18px" data-radio>
-      <div class="card pick on" data-preset="evenings"><span class="radio"></span><div><h3>Evenings</h3><p>7 to 9 pm, every day</p></div></div>
-      <div class="card pick" data-preset="afterwork"><span class="radio"></span><div><h3>After work</h3><p>6 to 10 pm on weekdays, afternoons at weekends</p></div></div>
+      <div class="card pick on" data-preset="evenings"><span class="radio"></span><div><h3>Evenings</h3><p>7 to 9 pm</p></div></div>
+      <div class="card pick" data-preset="afterwork"><span class="radio"></span><div><h3>After work</h3><p>6 to 10 pm, afternoons at weekends</p></div></div>
       <div class="card pick" data-preset="weekends"><span class="radio"></span><div><h3>Weekends only</h3><p>Saturday and Sunday, 2 to 8 pm</p></div></div>
-      <div class="card pick" data-preset="never"><span class="radio"></span><div><h3>Never</h3><p>Only with a pass, once a week</p></div></div>
+      <div class="card pick" data-preset="never"><span class="radio"></span><div><h3>Never</h3><p>Only with a pass</p></div></div>
     </div>
     <div class="ribbon-mini" id="day-ribbon"></div>
     <div class="scale"><span>4 am</span><span>noon</span><span>8 pm</span><span>4 am</span></div>
-    <div class="list" style="margin-top:10px">
-      <div class="row" data-sheet="time"><div class="text"><div class="name" style="color:var(--bone)">Evening</div><div class="meta">when your apps open</div></div><span class="value num">7:00 – 9:00 pm</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
-      <div class="row" style="cursor:default"><div class="text"><div class="name" style="color:var(--bone)">Night in grayscale</div><div class="meta">10 pm to 7 am, essentials only</div></div><span class="switch on"></span></div>
+    <div class="group" style="margin-top:14px">
+      <div class="row" data-sheet="time"><div class="text"><div class="name">Evening</div></div><span class="value num">7:00 – 9:00 pm</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
+      <div class="row" style="cursor:default"><div class="text"><div class="name">Night in grayscale</div></div><span class="switch on"></span></div>
     </div>
-    <div class="grow"></div>
     <div class="actions dock"><button class="btn primary" data-go="when">Continue</button></div>
   </section>
 
-  <!-- 5 When each app -->
+  <!-- 4 When each app -->
   <section class="screen" id="s-when">
-    <div class="topbar"><a class="back" data-go="day"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="caps">step 4 of 8</span></div>
-    <h1 class="title">When each one opens</h1>
-    <p class="lede">Each app opens only in the blocks you pick, for the minutes you set.</p>
+    <div class="topbar"><a class="back" data-go="day"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="step">4 of 9</span></div>
+    <h1 class="title">How long for each?</h1>
+    <p class="lede">Tap an app to change when it opens or for how long.</p>
     <div class="group" style="margin-top:18px" id="when-cards"></div>
-    <div class="grow"></div>
     <div class="actions dock"><button class="btn primary" data-go="essentials">Continue</button></div>
   </section>
 
-  <!-- 6 Essentials -->
+  <!-- 5 Essentials -->
   <section class="screen" id="s-essentials">
-    <div class="topbar"><a class="back" data-go="when"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="caps">step 5 of 8</span></div>
+    <div class="topbar"><a class="back" data-go="when"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="step">5 of 9</span></div>
     <h1 class="title">Your essentials</h1>
-    <p class="lede">Always open, even in Quiet, and always on home. Keep it short: everything else still opens from search.</p>
-    <div class="list" style="margin-top:14px" id="ess-list"></div>
+    <p class="lede">Always open, even in Quiet. Keep it short.</p>
+    <div class="group" style="margin-top:16px" id="ess-list"></div>
+    <div class="actions dock"><button class="btn primary" data-go="sites">Continue</button></div>
+  </section>
+
+  <!-- 6 Websites -->
+  <section class="screen" id="s-sites">
+    <div class="topbar"><a class="back" data-go="essentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="step">6 of 9</span></div>
+    <h1 class="title">Websites too</h1>
+    <p class="lede">So a browser isn't a way around your plan.</p>
+    <div class="group" style="margin-top:18px">
+      <div class="row" style="cursor:default"><div class="text"><div class="name">Adult content</div><div class="meta">blocked everywhere, always</div></div><span class="switch on"></span></div>
+      <div class="row" style="cursor:default"><div class="text"><div class="name">Gambling and betting</div><div class="meta">blocked everywhere, always</div></div><span class="switch on"></span></div>
+      <div class="row" style="cursor:default"><div class="text"><div class="name">Sites follow their apps</div><div class="meta">instagram.com opens only when Instagram does</div></div><span class="switch on"></span></div>
+    </div>
+    <p class="note" style="margin:10px 4px 0">You can add your own sites later, in Websites.</p>
     <div class="actions dock"><button class="btn primary" data-go="promise">Continue</button></div>
   </section>
 
   <!-- 7 Promise -->
   <section class="screen" id="s-promise">
-    <div class="topbar"><a class="back" data-go="essentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="caps">step 6 of 8</span></div>
+    <div class="topbar"><a class="back" data-go="sites"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="step">7 of 9</span></div>
     <h1 class="title">Your promise</h1>
-    <p class="lede">Make it once, while you're calm. Covenant keeps it when you're not.</p>
+    <p class="lede">Make it once, while you're calm.</p>
     <div class="card" style="margin-top:18px">
       <h3>Passes</h3>
-      <p>A pass opens one app for 10 minutes, after a 1-minute wait. It comes back 7 days after you use it. Never daily.</p>
+      <p>Open one app for 10 minutes, after a 1-minute wait. Each comes back 7 days after you use it.</p>
       <div class="seg" style="margin-top:14px" data-seg><button>None</button><button class="on">1 a week</button><button>2 a week</button></div>
     </div>
-    <div class="card">
-      <h3>Cooldown · 72 hours</h3>
-      <p>Anything that gives an app more time waits 72 hours. Anything stricter applies at once.</p>
-    </div>
-    <div class="card">
-      <h3>Your first week</h3>
-      <p>Until you seal, and for 7 days after, every change is instant, so you can get it right.</p>
-    </div>
-    <div class="grow"></div>
+    <div class="card"><h3>Loosening waits 72 hours</h3><p>Tightening applies at once.</p></div>
+    <div class="card"><h3>Your first week is free</h3><p>Until 7 days after you seal, every change is instant.</p></div>
     <div class="actions dock"><button class="btn primary" data-go="access">Continue</button></div>
   </section>
 
   <!-- 8 Access -->
   <section class="screen" id="s-access">
-    <div class="topbar"><a class="back" data-go="promise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="caps">step 7 of 8</span></div>
+    <div class="topbar"><a class="back" data-go="promise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="step">8 of 9</span></div>
     <h1 class="title">Let Covenant keep it</h1>
-    <p class="lede">Each switch opens Android's own settings. Come back here after each one.</p>
+    <p class="lede">Each one opens Android's settings. Come back after each.</p>
     <div class="card" style="margin-top:18px">
-      <div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><h3>See which app opens</h3><p>Accessibility</p></div><span data-grant><button class="pill-btn">Turn on</button></span></div>
-      <div class="disclosure">Covenant uses Android's accessibility service only to see which app comes to the front, so it can keep your plan. It never reads what's on screen, and nothing leaves your phone.</div>
+      <div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><h3>See what opens</h3><p>Accessibility</p></div><span data-grant><button class="pill-btn">Turn on</button></span></div>
+      <div class="disclosure">Covenant uses accessibility only to see which app comes to the front and the web address in your browser, so it can keep your plan. It never reads anything else on screen, and nothing leaves your phone.</div>
     </div>
-    <div class="card"><div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><h3>Hold messages</h3><p>Notification access · until their app's block</p></div><span data-grant><button class="pill-btn">Turn on</button></span></div></div>
-    <div class="card"><div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><h3>Wake on time</h3><p>Alarms and reminders · blocks start to the minute</p></div><span data-grant><button class="pill-btn">Allow</button></span></div></div>
-    <div class="card"><div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><h3>Stay awake overnight</h3><p>Battery · so Android doesn't stop Covenant</p></div><span data-grant><button class="pill-btn">Allow</button></span></div></div>
-    <div class="grow"></div>
+    <div class="card"><div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><h3>Hold messages</h3><p>Notification access</p></div><span data-grant><button class="pill-btn">Turn on</button></span></div></div>
+    <div class="card"><div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><h3>Filter websites</h3><p>Private DNS</p></div><span data-grant><button class="pill-btn">Set up</button></span></div></div>
+    <div class="card"><div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><h3>Wake on time</h3><p>Alarms and reminders</p></div><span data-grant><button class="pill-btn">Allow</button></span></div></div>
+    <div class="card"><div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><h3>Stay awake overnight</h3><p>Battery</p></div><span data-grant><button class="pill-btn">Allow</button></span></div></div>
     <div class="actions dock"><button class="btn primary" data-go="homeset">Continue</button></div>
   </section>
 
   <!-- 9 Home -->
   <section class="screen" id="s-homeset">
-    <div class="topbar"><a class="back" data-go="access"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="caps">step 8 of 8</span></div>
-    <h1 class="title">Make Covenant your home screen</h1>
-    <p class="lede">Home becomes a quiet page: the time of day, what's open, and nothing else.</p>
-    <div class="card center" style="margin-top:22px;padding:26px 18px">
-      <div class="caps">Saturday · 31 October</div>
-      <div style="font-size:22px;color:var(--bright);margin-top:12px;font-variation-settings:'opsz' 36">Evening</div>
-      <div class="note">until 9:00</div>
-      <div style="font-size:26px;margin-top:14px;font-weight:330;font-variation-settings:'opsz' 48">Instagram</div>
-      <div style="font-size:26px;font-weight:330;font-variation-settings:'opsz' 48">YouTube</div>
+    <div class="topbar"><a class="back" data-go="access"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="step">9 of 9</span></div>
+    <h1 class="title">Make it your home screen</h1>
+    <p class="lede">Home becomes one quiet page with only what's open now.</p>
+    <div class="card center" style="margin-top:22px;padding:28px 18px">
+      <div class="chapter">Evening</div>
+      <div style="font-size:26px;margin-top:12px;font-weight:330;font-variation-settings:'opsz' 48;color:var(--bright)">Instagram</div>
+      <div style="font-size:26px;font-weight:330;font-variation-settings:'opsz' 48;color:var(--bright)">YouTube</div>
     </div>
-    <div class="grow"></div>
     <div class="actions dock">
       <button class="btn primary" data-go="done">Set as home screen</button>
       <button class="btn text" data-go="done">Later</button>
     </div>
   </section>
 
-  <!-- 10 Done -->
-  <section class="screen" id="s-done" data-tide>
+  <!-- Done -->
+  <section class="screen" id="s-done" data-glow>
     <div class="grow"></div>
     <svg class="seal" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="40" fill="none" stroke="#D8DEE6" stroke-width="2.4"/><circle cx="50" cy="50" r="31" fill="none" stroke="#D8DEE6" stroke-width="1.6"/><path d="M24 54 C32 46 40 46 48 52 C56 58 64 58 76 48" fill="none" stroke="#6FA8C9" stroke-width="2.4" stroke-linecap="round"/><circle cx="62" cy="40" r="3" fill="#D8DEE6"/></svg>
     <h1 class="title center" style="margin-top:26px">You're set.</h1>
-    <p class="lede center">Your plan starts now. While you settle in, every change is instant. Seal your promise from the menu when it feels right.</p>
+    <p class="lede center">Every change stays instant while you settle in. Seal your promise when it feels right.</p>
     <div class="grow"></div>
     <div class="actions"><button class="btn primary" data-go="home">Go to home</button></div>
   </section>
 
   <!-- Home: Evening -->
-  <section class="screen" id="s-home" data-tide>
-    <div class="home-head"><div class="caps">Saturday · 31 October</div><div class="chapter">Evening</div><div class="until">until 9:00</div></div>
+  <section class="screen" id="s-home" data-glow>
     <div class="grow"></div>
-    <div class="big"><a data-go="pause">Instagram</a><a data-go="pause">YouTube</a><a>Spotify</a></div>
+    <div class="home-head" data-go="today" style="cursor:pointer"><div class="chapter">Evening</div><div class="until">until 9:00</div></div>
+    <div class="big"><a data-go="pause">Instagram<span class="left">22m</span></a><a data-go="pause">YouTube<span class="left">45m</span></a><a>Spotify</a></div>
+    <div class="essentials"><a>Phone</a><a>Messages</a><a>Maps</a><a>Camera</a><a>PhonePe</a></div>
     <div class="grow"></div>
-    <svg class="ornament" viewBox="0 0 30 8"><path d="M1 5 C5 1.5 9 1.5 13 4.5 C17 7.5 21 7.5 25 4 C27 2.4 28 2 29 3" fill="none" stroke="#4A5566" stroke-width="1.2" stroke-linecap="round"/></svg>
-    <div class="essentials"><a>phone</a><a>messages</a><a>maps</a><a>camera</a><a>phonepe</a><a>clock</a></div>
-    <div class="home-next">Night at 9:00</div>
-    <div class="strip"><a data-go="today">today</a><a data-go="search">search</a><a data-go="menu">covenant</a></div>
+    <div class="dots"><i class="on"></i><i data-go="today"></i></div>
+    <div class="homebar">
+      <div class="searchpill" data-go="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Search</div>
+      <div class="roundbtn" data-go="menu" title="Covenant"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#A9B4C2" stroke-width="6"/><path d="M26 55 C34 45 42 45 50 52 C58 59 66 59 76 48" fill="none" stroke="#A9B4C2" stroke-width="6" stroke-linecap="round"/></svg></div>
+    </div>
   </section>
 
   <!-- Home: Day -->
-  <section class="screen" id="s-homeday" data-tide>
-    <div class="home-head"><div class="caps">Saturday · 31 October</div><div class="chapter">Day</div><div class="until">until 7:00</div></div>
+  <section class="screen" id="s-homeday" data-glow="day">
     <div class="grow"></div>
+    <div class="home-head" data-go="today" style="cursor:pointer"><div class="chapter">Day</div><div class="until">until 7:00</div></div>
     <div class="big"><a>Gmail</a><a>Slack</a><a>Calendar</a></div>
+    <div class="essentials"><a>Phone</a><a>Messages</a><a>Maps</a><a>Camera</a><a>PhonePe</a></div>
     <div class="grow"></div>
-    <svg class="ornament" viewBox="0 0 30 8"><path d="M1 5 C5 1.5 9 1.5 13 4.5 C17 7.5 21 7.5 25 4 C27 2.4 28 2 29 3" fill="none" stroke="#4A5566" stroke-width="1.2" stroke-linecap="round"/></svg>
-    <div class="essentials"><a>phone</a><a>messages</a><a>maps</a><a>camera</a><a>phonepe</a><a>clock</a></div>
-    <div class="home-next">Evening at 7:00</div>
-    <div class="strip"><a data-go="today">today</a><a data-go="search">search</a><a data-go="menu">covenant</a></div>
+    <div class="dots"><i class="on"></i><i data-go="today"></i></div>
+    <div class="homebar">
+      <div class="searchpill" data-go="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Search</div>
+      <div class="roundbtn" data-go="menu" title="Covenant"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#A9B4C2" stroke-width="6"/><path d="M26 55 C34 45 42 45 50 52 C58 59 66 59 76 48" fill="none" stroke="#A9B4C2" stroke-width="6" stroke-linecap="round"/></svg></div>
+    </div>
   </section>
 
   <!-- Today -->
-  <section class="screen" id="s-today" data-tide>
-    <div class="topbar"><a class="back" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="caps">Saturday · 31 October</span></div>
-    <div class="ribbon">
-      <div class="hours"><span>4 am</span><span>8</span><span>noon</span><span>4 pm</span><span>8</span><span>midnight</span></div>
-      <div class="bands">
-        <div class="band" style="height:120px;background:#5B6CA6"><b>Night</b><span>still</span></div>
-        <div class="band" style="height:46px;background:#8EA8C6"><b>Morning</b><span>still</span></div>
-        <div class="band" style="height:180px;background:#B7AE93"><b>Day</b><span>rippled</span><i class="ripple"></i><i class="ripple r2"></i><i class="ripple r3"></i></div>
-        <div class="band now" style="height:56px;background:#C08A4E"><b>Evening</b><span>now</span></div>
-        <div class="band faint" style="height:90px;background:#4A4F9A"><b>Night</b><span>later</span></div>
+  <section class="screen" id="s-today" data-glow>
+    <div class="topbar"><a class="back" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a></div>
+    <h1 class="largetitle" style="margin-bottom:4px">Today</h1>
+    <p class="note" style="margin-bottom:14px">Saturday 31 October</p>
+    <div class="stats">
+      <div class="stat"><div class="v">35 min</div><div class="k">feeds · was 3 h 10</div></div>
+      <div class="stat"><div class="v">4</div><div class="k">times you let go</div></div>
+    </div>
+    <div class="ribbon" style="margin-top:18px">
+      <div class="hours" id="today-hours"></div>
+      <div class="bands" id="today-bands">
+        <div class="band" style="height:96px;background:#5B6CA6"><b>Night</b></div>
+        <div class="band" style="height:40px;background:#8EA8C6"><b>Morning</b></div>
+        <div class="band" style="height:150px;background:#B7AE93"><b>Day</b><span>pass · Uber 1:00</span><i class="ripple"></i><i class="ripple r2"></i><i class="ripple r3"></i></div>
+        <div class="band now" style="height:46px;background:#C08A4E"><b>Evening</b><span>now</span></div>
+        <div class="band faint" style="height:70px;background:#4A4F9A"><b>Night</b></div>
       </div>
     </div>
-    <p class="sum">Feeds today: <b>35 min</b>. Before Covenant: 3 h 10 min.<br>You let go <b>4 times</b>.</p>
-    <p class="note center" style="margin-top:10px">Day rippled: a pass for Uber at 1:00.</p>
   </section>
 
   <!-- Search -->
   <section class="screen" id="s-search">
-    <div class="topbar"><a class="back" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="caps">Search</span></div>
+    <div class="topbar"><a class="back" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a></div>
     <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input value="ma" aria-label="Search"></div>
-    <p class="note" style="margin:2px 4px 6px">Everything open now, tools included.</p>
-    <div class="list" id="search-list"></div>
+    <div class="group" id="search-list" style="margin-top:6px"></div>
   </section>
 
   <!-- Menu -->
-  <section class="screen" id="s-menu" data-tide>
-    <div class="topbar"><a class="back" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="caps">Covenant</span></div>
-    <div class="list" style="margin-top:6px">
-      <div class="row" data-go="apps"><div class="text"><div class="name" style="color:var(--bone)">Your apps</div><div class="meta">5 pull you in · 8 essentials</div></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
-      <div class="row" data-go="dayedit"><div class="text"><div class="name" style="color:var(--bone)">Your day</div><div class="meta">4 blocks · weekends differ</div></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
-      <div class="row" data-sheet="quiet"><div class="text"><div class="name" style="color:var(--bone)">Quiet</div><div class="meta">essentials only, starting now</div></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
-      <div class="row" data-sheet="pass"><div class="text"><div class="name" style="color:var(--bone)">Use a pass</div><div class="meta">1 left this week</div></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
-      <div class="row"><div class="text"><div class="name" style="color:var(--bone)">Changes waiting</div><div class="meta">none</div></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
-      <div class="row" data-go="settings"><div class="text"><div class="name" style="color:var(--bone)">Settings</div><div class="meta">promise, alerts, protections</div></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
+  <section class="screen" id="s-menu" data-glow>
+    <div class="topbar"><a class="back" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a></div>
+    <h1 class="largetitle">Covenant</h1>
+    <div class="group">
+      <div class="row" data-sheet="quiet"><div class="text"><div class="name">Quiet</div></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
+      <div class="row" data-sheet="pass"><div class="text"><div class="name">Use a pass</div></div><span class="value">1 left</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
+    </div>
+    <div class="group" style="margin-top:14px">
+      <div class="row" data-go="apps"><div class="text"><div class="name">Your apps</div></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
+      <div class="row" data-go="dayedit"><div class="text"><div class="name">Your day</div></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
+      <div class="row" data-go="websites"><div class="text"><div class="name">Websites</div></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
+      <div class="row" data-go="settings"><div class="text"><div class="name">Settings</div></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
     </div>
     <div class="grow"></div>
-    <p class="note center">Unguarded · every change is instant until you seal</p>
+    <p class="note center">Not sealed yet · every change is instant</p>
   </section>
 
   <!-- Your apps -->
   <section class="screen" id="s-apps">
-    <div class="topbar"><a class="back" data-go="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="caps">Your apps</span></div>
+    <div class="topbar"><a class="back" data-go="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a></div>
+    <h1 class="largetitle">Your apps</h1>
     <div class="seg" data-seg data-tabs="apps"><button class="on" data-tab="pull">Pull you in</button><button data-tab="ess">Essentials</button><button data-tab="tools">Tools</button></div>
     <div data-panel="pull">
-      <p class="note" style="margin:14px 2px 2px">Tap an app to change when it opens.</p>
-      <div class="list" id="apps-pull"></div>
-      <button class="btn secondary" style="margin-top:14px">Add an app that pulls you in</button>
+      <div class="group" id="apps-pull" style="margin-top:14px"></div>
+      <button class="btn secondary" style="margin-top:12px">Add an app</button>
     </div>
     <div data-panel="ess" style="display:none">
-      <p class="note" style="margin:14px 2px 2px">Always open and on home.</p>
-      <div class="list" id="apps-ess"></div>
+      <div class="group" id="apps-ess" style="margin-top:14px"></div>
+      <p class="note" style="margin:8px 4px">Always open, even in Quiet.</p>
     </div>
     <div data-panel="tools" style="display:none">
-      <p class="note" style="margin:14px 2px 2px">Open any time from search. Pin one to show it on home during a block.</p>
-      <div class="list" id="apps-tools"></div>
+      <div class="group" id="apps-tools" style="margin-top:14px"></div>
+      <p class="note" style="margin:8px 4px">Open any time from search.</p>
     </div>
   </section>
 
   <!-- Your day -->
   <section class="screen" id="s-dayedit">
-    <div class="topbar"><a class="back" data-go="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="caps">Your day</span></div>
+    <div class="topbar"><a class="back" data-go="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a></div>
+    <h1 class="largetitle">Your day</h1>
     <div class="seg" data-seg><button class="on">Weekdays</button><button>Weekends</button></div>
-    <div class="ribbon-mini" style="margin-top:18px"><div style="flex:3;background:#5B6CA6"></div><div style="flex:2;background:#8EA8C6"></div><div style="flex:10;background:#B7AE93"></div><div style="flex:2;background:#C08A4E"></div><div style="flex:7;background:#4A4F9A"></div></div>
+    <div class="ribbon-mini"><div style="flex:3;background:#5B6CA6"></div><div style="flex:2;background:#8EA8C6"></div><div style="flex:10;background:#B7AE93"></div><div style="flex:2;background:#C08A4E"></div><div style="flex:7;background:#4A4F9A"></div></div>
     <div class="scale"><span>4 am</span><span>noon</span><span>8 pm</span><span>4 am</span></div>
-    <div class="list" style="margin-top:12px">
-      <div class="row" data-sheet="block"><span class="icon" style="background:#8EA8C6;width:12px;height:40px;border-radius:6px"></span><div class="text"><div class="name" style="color:var(--bone)">Morning</div><div class="meta">7:00 – 9:00 am · nothing that pulls you in</div></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
-      <div class="row" data-sheet="block"><span class="icon" style="background:#B7AE93;width:12px;height:40px;border-radius:6px"></span><div class="text"><div class="name" style="color:var(--bone)">Day</div><div class="meta">9:00 am – 7:00 pm · Gmail, Slack pinned</div></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
-      <div class="row" data-sheet="block"><span class="icon" style="background:#C08A4E;width:12px;height:40px;border-radius:6px"></span><div class="text"><div class="name" style="color:var(--bone)">Evening</div><div class="meta">7:00 – 9:00 pm · Instagram, YouTube</div></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
-      <div class="row" data-sheet="block"><span class="icon" style="background:#4A4F9A;width:12px;height:40px;border-radius:6px"></span><div class="text"><div class="name" style="color:var(--bone)">Night</div><div class="meta">9:00 pm – 7:00 am · grayscale</div></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
+    <div class="group" style="margin-top:14px" id="day-blocks"></div>
+    <button class="btn secondary" style="margin-top:12px">Add a block</button>
+  </section>
+
+  <!-- Websites -->
+  <section class="screen" id="s-websites">
+    <div class="topbar"><a class="back" data-go="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a></div>
+    <h1 class="largetitle">Websites</h1>
+    <div class="caps section" style="margin-top:0">Always blocked</div>
+    <div class="group">
+      <div class="row" style="cursor:default"><div class="text"><div class="name">Adult content</div></div><span class="switch on"></span></div>
+      <div class="row" style="cursor:default"><div class="text"><div class="name">Gambling and betting</div></div><span class="switch on"></span></div>
     </div>
-    <button class="btn secondary" style="margin-top:14px">Add a block</button>
-    <p class="note center" style="margin-top:10px">Up to 5 blocks. Time outside every block is essentials only.</p>
+    <div class="caps section">Follow their apps</div>
+    <div class="group" id="site-follow"></div>
+    <div class="caps section">Your list</div>
+    <div class="group">
+      <div class="row"><div class="text"><div class="domain">news.ycombinator.com</div></div><span class="value">Evening</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
+      <div class="row"><div class="text"><div class="domain">hotstar.com</div></div><span class="value">never</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
+    </div>
+    <button class="btn secondary" style="margin-top:12px">Add a website</button>
+    <p class="note" style="margin:12px 4px 0">Adult and gambling sites are filtered by Android's Private DNS. Other sites are matched by the address in your browser.</p>
   </section>
 
   <!-- Settings -->
   <section class="screen" id="s-settings">
-    <div class="topbar"><a class="back" data-go="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a><span class="caps">Settings</span></div>
-    <div class="caps section">Your promise</div>
-    <div class="list">
-      <div class="row"><div class="text"><div class="name" style="color:var(--bone)">Passes</div><div class="meta">one app for 10 minutes</div></div><span class="value">1 a week</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
-      <div class="row"><div class="text"><div class="name" style="color:var(--bone)">Cooldown</div><div class="meta">how long loosening waits</div></div><span class="value">72 hours</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
-      <div class="row"><div class="text"><div class="name" style="color:var(--bone)">Calls that ring through</div><div class="meta">from apps outside their block</div></div><span class="value">WhatsApp</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
+    <div class="topbar"><a class="back" data-go="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></a></div>
+    <h1 class="largetitle">Settings</h1>
+    <div class="group">
+      <div class="row"><div class="text"><div class="name">Passes</div></div><span class="value">1 a week</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
+      <div class="row"><div class="text"><div class="name">Cooldown</div></div><span class="value">72 hours</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
+      <div class="row"><div class="text"><div class="name">Calls that ring through</div></div><span class="value">WhatsApp</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
     </div>
-    <div class="caps section">Alerts</div>
-    <div class="list"><div class="row" style="cursor:default"><div class="text"><div class="name" style="color:var(--bone)">Covenant plays alert sounds</div><div class="meta">held apps stay silent; allowed apps still ring</div></div><span class="switch on"></span></div></div>
-    <div class="caps section">Protections</div>
-    <div class="list">
-      <div class="row" style="cursor:default"><div class="text"><div class="name" style="color:var(--bone)">See which app opens</div></div><span class="status-on">on</span></div>
-      <div class="row" style="cursor:default"><div class="text"><div class="name" style="color:var(--bone)">Hold messages</div></div><span class="status-on">on</span></div>
-      <div class="row" style="cursor:default"><div class="text"><div class="name" style="color:var(--bone)">Home screen</div></div><span class="status-on">on</span></div>
+    <div class="group" style="margin-top:14px">
+      <div class="row" style="cursor:default"><div class="text"><div class="name">Covenant plays alert sounds</div></div><span class="switch on"></span></div>
+      <div class="row"><div class="text"><div class="name">Protections</div></div><span class="status-on">all on</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
     </div>
-    <div class="actions"><button class="btn primary">Seal your promise</button><p class="note center">Your first 7 days after sealing stay instant.</p></div>
+    <div class="grow"></div>
+    <div class="actions"><button class="btn primary">Seal your promise</button><p class="note center">The 7 days after you seal stay instant.</p></div>
   </section>
 
   <!-- Pause -->
   <section class="screen" id="s-pause">
     <div class="bloom" id="bloom"></div>
-    <div class="pause-words" id="pause-words"><div class="n">30<em>min</em></div><div class="in">left in Evening</div></div>
+    <div class="pause-words" id="pause-words"><div class="n">22<em>min</em></div><div class="in">left in Evening</div></div>
     <div class="pause-choice" id="pause-choice">
       <button class="btn primary" data-go="home">Open Instagram</button>
       <button class="btn text" data-go="home">Let go</button>
     </div>
   </section>
 
-  <!-- Blocked -->
-  <section class="screen" id="s-blocked" data-tide>
-    <div class="caps center">Day</div>
+  <!-- Blocked app -->
+  <section class="screen" id="s-blocked" data-glow="day">
     <div class="grow"></div>
     <div class="icon lg" style="background:#C9A27E;margin:0 auto">I</div>
     <h1 class="title center" style="margin-top:20px">Instagram opens<br>at 7:00 pm.</h1>
-    <p class="lede center">It belongs to Evening.</p>
     <div class="grow"></div>
     <div id="blocked-offer" class="actions">
       <button class="btn primary" id="blocked-pass">Use a pass <small>· 1 left this week</small></button>
-      <button class="btn text" data-go="homeday">Back to home</button>
+      <button class="btn text" data-go="homeday">Not now</button>
     </div>
     <div id="blocked-wait" class="wait" style="display:none">
       <div class="t" id="blocked-count">0:59</div>
-      <p class="note">A minute to be sure. Then Instagram opens for 10 minutes.</p>
+      <p class="note">Then Instagram opens for 10 minutes.</p>
       <button class="btn text" style="margin-top:8px" id="blocked-cancel">Never mind</button>
     </div>
   </section>
 
+  <!-- Blocked website -->
+  <section class="screen" id="s-siteblocked" data-glow="day">
+    <div class="grow"></div>
+    <div class="caps center">instagram.com</div>
+    <h1 class="title center" style="margin-top:14px">Opens at 7:00 pm,<br>with Instagram.</h1>
+    <div class="grow"></div>
+    <div class="actions">
+      <button class="btn primary" data-go="homeday">Use a pass <small>· 1 left this week</small></button>
+      <button class="btn text" data-go="homeday">Not now</button>
+    </div>
+  </section>
+
   <!-- New app -->
-  <section class="screen" id="s-newapp" data-tide>
+  <section class="screen" id="s-newapp" data-glow>
     <div class="grow"></div>
     <div class="icon lg" style="background:#D0B47A;margin:0 auto">M</div>
     <h1 class="title center" style="margin-top:18px">You installed Moj.</h1>
-    <p class="lede center">Is it a tool, or does it pull you in?</p>
     <div style="margin-top:22px" data-radio>
-      <div class="card pick" data-new="tool"><span class="radio"></span><div><h3>A tool</h3><p>Opens any time from search.</p></div></div>
+      <div class="card pick" data-new="tool"><span class="radio"></span><div><h3>It's a tool</h3><p>Opens any time.</p></div></div>
       <div class="card pick on" data-new="pull"><span class="radio"></span><div><h3>It pulls me in</h3><p>Opens only when I plan.</p></div></div>
     </div>
     <div id="newapp-when" style="margin-top:16px">
-      <div class="caps" style="margin-bottom:8px">Opens in</div>
       <div class="chips" data-multi><button class="chip">Morning</button><button class="chip">Day</button><button class="chip on">Evening</button><button class="chip">Night</button></div>
-      <div class="caps" style="margin:14px 0 8px">For</div>
-      <div class="chips" data-single><button class="chip">15 min</button><button class="chip on">30 min</button><button class="chip">45 min</button><button class="chip">1 hour</button></div>
+      <div class="chips" data-single style="margin-top:10px"><button class="chip">15 min</button><button class="chip on">30 min</button><button class="chip">45 min</button><button class="chip">1 hour</button></div>
     </div>
     <div class="grow"></div>
     <div class="actions"><button class="btn primary" data-go="home">Done</button></div>
@@ -597,7 +633,7 @@ button { font-family: inherit; color: inherit; }
 
   <div class="sheet" id="sheet-app">
     <div class="grabber"></div>
-    <div style="display:flex;align-items:center;gap:14px"><span class="icon lg" style="background:#C9A27E">I</span><div><div style="font-size:22px;color:var(--bright);font-variation-settings:'opsz' 30">Instagram</div><div class="note">3 h 10 min a day before Covenant</div></div></div>
+    <div style="display:flex;align-items:center;gap:14px"><span class="icon lg" style="background:#C9A27E">I</span><div><div class="sheettitle">Instagram</div><div class="note">3 h 10 min a day before</div></div></div>
     <div class="seg" style="margin-top:18px" data-seg><button class="on">Weekdays</button><button>Weekends</button></div>
     <div class="label">Opens in</div>
     <div class="chips" data-multi><button class="chip">Morning</button><button class="chip">Day</button><button class="chip on">Evening</button><button class="chip">Night</button></div>
@@ -611,20 +647,20 @@ button { font-family: inherit; color: inherit; }
 
   <div class="sheet" id="sheet-block">
     <div class="grabber"></div>
-    <div style="font-size:24px;color:var(--bright);font-variation-settings:'opsz' 30">Evening</div>
-    <div class="list" style="margin-top:10px">
-      <div class="row" data-sheet="time"><div class="text"><div class="name" style="color:var(--bone)">Starts</div></div><span class="value num">7:00 pm</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
-      <div class="row" data-sheet="time"><div class="text"><div class="name" style="color:var(--bone)">Ends</div></div><span class="value num">9:00 pm</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
-      <div class="row" style="cursor:default"><div class="text"><div class="name" style="color:var(--bone)">Grayscale</div></div><span class="switch"></span></div>
+    <div class="sheettitle">Evening</div>
+    <div class="group" style="margin-top:14px;background:#182231">
+      <div class="row" data-sheet="time"><div class="text"><div class="name">Starts</div></div><span class="value num">7:00 pm</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
+      <div class="row" data-sheet="time"><div class="text"><div class="name">Ends</div></div><span class="value num">9:00 pm</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
+      <div class="row" style="cursor:default"><div class="text"><div class="name">Grayscale</div></div><span class="switch"></span></div>
     </div>
-    <div class="label">Open in this block</div>
-    <div class="list" id="block-apps"></div>
+    <div class="label">Opens in this block</div>
+    <div class="group" style="background:#182231" id="block-apps"></div>
     <div class="actions" style="margin-top:20px"><button class="btn primary" data-close>Save <small>· applies now</small></button><button class="btn danger" data-close>Remove this block</button></div>
   </div>
 
   <div class="sheet" id="sheet-time">
     <div class="grabber"></div>
-    <div style="font-size:22px;color:var(--bright);text-align:center;font-variation-settings:'opsz' 30">Evening starts</div>
+    <div class="sheettitle center">Evening starts</div>
     <div class="wheel">
       <div class="col" id="w-h"></div><div class="col" id="w-m"></div><div class="col" id="w-p"></div>
     </div>
@@ -633,17 +669,17 @@ button { font-family: inherit; color: inherit; }
 
   <div class="sheet" id="sheet-pass">
     <div class="grabber"></div>
-    <div style="font-size:24px;color:var(--bright);font-variation-settings:'opsz' 30">Use a pass</div>
-    <p class="note" style="margin-top:4px">Pick one app. It opens for 10 minutes after a 1-minute wait. 1 left this week; it comes back 7 days after you use it.</p>
-    <div class="list" style="margin-top:10px" id="pass-list" data-onepick></div>
+    <div class="sheettitle">Use a pass</div>
+    <p class="note" style="margin-top:4px">One app, 10 minutes, after a 1-minute wait.</p>
+    <div class="group" style="margin-top:14px;background:#182231" id="pass-list"></div>
     <div class="actions" style="margin-top:18px"><button class="btn primary" data-go="blocked" id="pass-start">Start the minute</button></div>
   </div>
 
   <div class="sheet" id="sheet-quiet">
     <div class="grabber"></div>
-    <div style="font-size:24px;color:var(--bright);font-variation-settings:'opsz' 30">Quiet</div>
-    <p class="note" style="margin-top:4px">Only essentials open until it ends. You can't end it early.</p>
-    <div class="chips" style="margin-top:16px" data-single><button class="chip on">Until 9:00 <small>end of Evening</small></button><button class="chip">30 min</button><button class="chip">1 hour</button><button class="chip">90 min</button></div>
+    <div class="sheettitle">Quiet</div>
+    <p class="note" style="margin-top:4px">Only essentials until it ends. It can't be ended early.</p>
+    <div class="chips" style="margin-top:16px" data-single><button class="chip on">Until 9:00</button><button class="chip">30 min</button><button class="chip">1 hour</button><button class="chip">90 min</button></div>
     <div class="actions" style="margin-top:24px"><button class="btn primary" data-close>Start Quiet</button></div>
   </div>
 
@@ -672,32 +708,29 @@ const APPS = {
   calendar: { name: 'Calendar', color: '#8FB39A' }, spotify: { name: 'Spotify', color: '#A8C49A' },
   magicpin: { name: 'Magicpin', color: '#C79A84' }, moj: { name: 'Moj', color: '#D0B47A' },
 };
-const icon = (id, size = '') => `<span class="icon ${size}" style="background:${APPS[id].color}">${APPS[id].name[0]}</span>`;
+const icon = id => `<span class="icon" style="background:${APPS[id].color}">${APPS[id].name[0]}</span>`;
 const chev = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>';
 const row = (id, meta, on, trailing = '<span class="check"></span>', attrs = 'data-toggle') =>
   `<div class="row ${on ? 'on' : ''}" ${attrs}>${icon(id)}<div class="text"><div class="name">${APPS[id].name}</div>${meta ? `<div class="meta">${meta}</div>` : ''}</div>${trailing}</div>`;
 const fill = (id, html) => { document.getElementById(id).innerHTML = html; };
 
-// Mirror
 fill('mirror-rows', ['instagram', 'youtube', 'whatsapp', 'chrome', 'x', 'candy'].map((id, i) => {
   const widths = [100, 66, 42, 29, 21, 13];
-  return `<div class="row" style="cursor:default">${icon(id)}<div class="text"><div class="name" style="color:var(--bone)">${APPS[id].name}</div><div class="bar" style="width:${widths[i]}%"></div></div><span class="value num">${APPS[id].time}</span></div>`;
+  return `<div class="row" style="cursor:default">${icon(id)}<div class="text"><div class="name">${APPS[id].name}</div><div class="bar" style="width:${widths[i]}%"></div></div><span class="value num">${APPS[id].time}</span></div>`;
 }).join(''));
 document.getElementById('mirror-allow').onclick = () => {
   for (const [id, show] of [['mirror-ask', false], ['mirror-list', true], ['mirror-actions-ask', false], ['mirror-actions-next', true]])
     document.getElementById(id).style.display = show ? '' : 'none';
 };
 
-// Pull you in
-const suggested = [['instagram', true], ['youtube', true], ['x', true], ['candy', true], ['reddit', true], ['whatsapp', false], ['chrome', false]];
-fill('pull-suggested', suggested.map(([id, on]) => row(id, `${APPS[id].time} a day${APPS[id].cat ? ' · ' + APPS[id].cat : ''}`, on)).join(''));
-fill('pull-all', ['calendar', 'gmail', 'irctc', 'magicpin', 'photos', 'slack', 'spotify', 'uber'].map(id => row(id, APPS[id].time ? APPS[id].time + ' a day' : '', false)).join(''));
+fill('pull-suggested', [['instagram', true], ['youtube', true], ['x', true], ['candy', true], ['reddit', true], ['whatsapp', false], ['chrome', false]]
+  .map(([id, on]) => row(id, `${APPS[id].time} a day`, on)).join(''));
+fill('pull-all', ['calendar', 'gmail', 'irctc', 'magicpin', 'photos', 'slack', 'spotify', 'uber'].map(id => row(id, '', false)).join(''));
 const countPull = () => {
   const n = document.querySelectorAll('#s-pull .row.on').length;
   document.getElementById('pull-next').textContent = `Continue · ${n} ${n === 1 ? 'app' : 'apps'}`;
 };
 
-// Day presets
 const presets = {
   evenings: [[3, '#5B6CA6'], [12, '#B7AE93'], [2, '#C08A4E'], [7, '#4A4F9A']],
   afterwork: [[3, '#5B6CA6'], [11, '#B7AE93'], [4, '#C08A4E'], [6, '#4A4F9A']],
@@ -707,33 +740,42 @@ const presets = {
 const drawRibbon = p => fill('day-ribbon', presets[p].map(([f, c]) => `<div style="flex:${f};background:${c}"></div>`).join(''));
 drawRibbon('evenings');
 
-// When each app opens
 const whenApps = [['instagram', '30 min'], ['youtube', '45 min'], ['x', '20 min'], ['candy', '15 min'], ['reddit', '15 min']];
-fill('when-cards', whenApps.map(([id, min]) => row(id, `Evening · ${min} · every day`, true, chev, 'data-sheet="app"')).join(''));
+const right = text => `<span class="value">${text}</span>${chev}`;
+fill('when-cards', whenApps.map(([id, min]) => row(id, '', true, right(`Evening · ${min}`), 'data-sheet="app"')).join(''));
 
-// Essentials
-fill('ess-list', [['phone', 'calls always ring'], ['messages', 'OTPs and texts'], ['maps', ''], ['camera', ''], ['clock', 'alarms'], ['phonepe', 'UPI'], ['gpay', 'UPI'], ['paytm', 'UPI'], ['auth', 'sign-in codes'], ['whatsapp', 'tick if you need it all day']]
-  .map(([id, meta], i) => row(id, meta, i < 9)).join(''));
+fill('ess-list', [['phone'], ['messages'], ['maps'], ['camera'], ['clock'], ['phonepe'], ['gpay'], ['paytm'], ['auth'], ['whatsapp']]
+  .map(([id], i) => row(id, '', i < 9)).join(''));
 
-// Your apps
-fill('apps-pull', whenApps.map(([id, min]) => row(id, `Evening · ${min}`, true, `<span class="value"></span>${chev}`, 'data-sheet="app"')).join(''));
+fill('apps-pull', whenApps.map(([id, min]) => row(id, '', true, right(`Evening · ${min}`), 'data-sheet="app"')).join(''));
 fill('apps-ess', ['phone', 'messages', 'maps', 'camera', 'clock', 'phonepe', 'gpay', 'paytm'].map(id => row(id, '', true, chev, '')).join(''));
-fill('apps-tools', [['gmail', 'pinned in Day'], ['slack', 'pinned in Day'], ['calendar', ''], ['chrome', ''], ['irctc', ''], ['photos', ''], ['uber', ''], ['whatsapp', '']]
-  .map(([id, meta]) => row(id, meta, true, chev, '')).join(''));
+fill('apps-tools', [['gmail', 'on home in Day'], ['slack', 'on home in Day'], ['calendar', ''], ['chrome', ''], ['irctc', ''], ['photos', ''], ['uber', ''], ['whatsapp', '']]
+  .map(([id, meta]) => row(id, '', true, meta ? right(meta) : chev, '')).join(''));
 
-// Block sheet
-fill('block-apps', [['instagram', '30 min'], ['youtube', '45 min'], ['spotify', 'pinned tool']].map(([id, meta]) => row(id, meta, true)).join(''));
+fill('day-blocks', [['#8EA8C6', 'Morning', '7 – 9 am'], ['#B7AE93', 'Day', '9 am – 7 pm'], ['#C08A4E', 'Evening', '7 – 9 pm'], ['#4A4F9A', 'Night', '9 pm – 7 am']]
+  .map(([c, name, time]) => `<div class="row" data-sheet="block"><span style="width:10px;height:10px;border-radius:5px;background:${c};flex:none"></span><div class="text"><div class="name">${name}</div></div><span class="value num">${time}</span>${chev}</div>`).join(''));
 
-// Search
-fill('search-list', ['maps', 'magicpin', 'gmail', 'camera'].map(id => row(id, ({ maps: 'essential', camera: 'essential', gmail: 'tool', magicpin: 'tool' })[id], false, '', '')).join(''));
+fill('site-follow', [['instagram.com', 'Instagram'], ['youtube.com', 'YouTube'], ['x.com', 'X'], ['reddit.com', 'Reddit']]
+  .map(([d, app]) => `<div class="row" style="cursor:default"><div class="text"><div class="domain">${d}</div></div><span class="value">with ${app}</span></div>`).join(''));
 
-// Pass sheet
-fill('pass-list', ['instagram', 'youtube', 'x', 'candy', 'reddit'].map((id, i) => row(id, 'opens in Evening', i === 0, '<span class="check"></span>', 'data-pick')).join(''));
+fill('block-apps', [['instagram', '30 min'], ['youtube', '45 min'], ['spotify', 'on home']].map(([id, v]) => row(id, '', true, right(v), '')).join(''));
+fill('search-list', ['maps', 'magicpin', 'gmail', 'camera'].map(id => row(id, '', false, '', '')).join(''));
+fill('pass-list', ['instagram', 'youtube', 'x', 'candy', 'reddit'].map((id, i) => row(id, '', i === 0, '<span class="check"></span>', 'data-pick')).join(''));
 
-// Wheel
+// Hours beside today's ribbon, placed at the band edges.
+(() => {
+  const labels = ['4 am', '8 am', '9 am', '7 pm', '9 pm', '4 am'];
+  const heights = [96, 40, 150, 46, 70];
+  let y = 0;
+  const marks = [0];
+  heights.forEach(h => { y += h + 5; marks.push(y - 5); });
+  fill('today-hours', marks.map((m, i) => `<span style="top:${m}px">${labels[i]}</span>`).join(''));
+})();
+
 const col = (id, items, at) => {
   const el = document.getElementById(id);
   el.innerHTML = '<div class="pad"></div><div class="pad"></div>' + items.map(v => `<div>${v}</div>`).join('') + '<div class="pad"></div><div class="pad"></div>';
+  el.scrollTop = at * 40;
   requestAnimationFrame(() => { el.scrollTop = at * 40; });
 };
 const buildWheel = () => {
@@ -741,9 +783,6 @@ const buildWheel = () => {
   col('w-m', ['00', '15', '30', '45'], 0);
   col('w-p', ['am', 'pm'], 1);
 };
-
-// Navigation
-let current = 'welcome';
 
 // Give every screen with a docked action a scrolling body above it.
 document.querySelectorAll('.screen').forEach(screen => {
@@ -759,13 +798,16 @@ document.querySelectorAll('.screen').forEach(screen => {
 
 function go(id) {
   closeSheet();
-  current = id;
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === 's-' + id));
   document.querySelectorAll('.guide a').forEach(a => a.classList.toggle('on', a.dataset.go === id && !a.dataset.sheet));
   const screen = document.getElementById('s-' + id);
   if (screen) { screen.scrollTop = 0; screen.querySelectorAll('.scroll').forEach(b => { b.scrollTop = 0; }); }
-  document.querySelector('.tide').style.display = screen && screen.hasAttribute('data-tide') ? '' : 'none';
-  document.getElementById('clock').textContent = id === 'homeday' || id === 'blocked' ? '1:05' : '7:40';
+  const glow = document.getElementById('glow');
+  const kind = screen && screen.getAttribute('data-glow');
+  glow.style.display = kind === null ? 'none' : '';
+  glow.classList.toggle('day', kind === 'day');
+  const daytime = ['homeday', 'blocked', 'siteblocked'].includes(id);
+  document.getElementById('clock').textContent = daytime ? '1:05' : '7:40';
   if (id === 'pause') playPause();
   if (id === 'blocked') resetBlocked();
 }
@@ -855,10 +897,9 @@ document.addEventListener('click', e => {
   const sw = t.closest('.switch');
   if (sw) { sw.classList.toggle('on'); return; }
   const grant = t.closest('[data-grant] button');
-  if (grant) { grant.parentElement.innerHTML = '<span class="status-on">on ✓</span>'; return; }
+  if (grant) { grant.parentElement.innerHTML = '<span class="status-on">on</span>'; return; }
 });
 
-// Fit the phone to short windows.
 function fit() {
   const scale = Math.min(1, (window.innerHeight - 48) / 872);
   const stage = document.getElementById('stage');

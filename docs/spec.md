@@ -23,7 +23,7 @@ Covenant is an open-source digital-detox launcher for Android. It makes your pho
 | Pass | One a week by default (0–2). Each opens one outside app for 10 minutes after a 1-minute wait. It replaced daily borrows and the weekly emergency pass on Oct 31 |
 | Notifications | Covenant owns alert sounds: it mutes notification sound and vibration system-wide and replays them only for allowed apps |
 | Calls | Only apps you choose ring through outside their block |
-| Block extras | Grayscale per block. Websites follow their apps (v0.3) |
+| Block extras | Grayscale per block. Websites follow their apps, and adult and gambling sites are always blocked (R9, R61) |
 | Daily tools | Quiet (essentials only for the rest of the block or 30–90 minutes), special days (v0.3), weekly look-back (v0.3) |
 | Opening a limited app | A 3-second ink bloom showing the minutes left, then Open or Let go, once per visit |
 | Progress | Today's page, one swipe from home: time in time-limited apps against the week before install, and how often you let go |
@@ -163,8 +163,8 @@ Each rule has an ID to use in code, commits and tests. Ships in is the milestone
 | R6 | Tempting apps open only in their blocks. Essentials, tools and the system allowlist open any time. Home shows essentials and the current block's apps; search finds everything that opens right now. | v0.1 |
 | R7 | Outside apps are blocked from every entry point: home, search, notifications, links, recents, share sheets, split screen, picture-in-picture and bubbles. Closing an app sends you home and blocks re-entry; a picture-in-picture window is dismissed with a gesture. | v0.1 |
 | R8 | A newly installed app is a tool until you say otherwise. On first open, Covenant asks once (R59). | v0.1 |
-| R9 | Websites follow their apps: a domain is blocked in browsers whenever its app is outside the block. Adding a domain is instant; removing one follows the cooldown. | v0.3 |
-| R10 | A browser whose address bar Covenant can't read counts as an ordinary app and must be in a block to open. | v0.3 |
+| R9 | Websites follow their apps: a domain is blocked in browsers whenever its app is outside its blocks. Covenant reads only the address bar of known browsers to do this. Adding a domain is instant; removing one follows the cooldown. | v0.1 |
+| R10 | A browser whose address bar Covenant can't read is held like a tempting app with no block until you place it. | v0.1 |
 
 ## Rules: time limits, block changes, notifications and calls
 
@@ -250,6 +250,8 @@ Added on Oct 31 for the people in [product.md](product.md).
 | R58 | Nothing is enforced and no notification is held until setup is finished, so a fresh install never blocks the phone it lands on. | v0.1 |
 | R59 | The first time a newly installed app opens, Covenant asks once: tool or temptation. A tool opens from then on. A temptation is held to the blocks and minutes you choose right there, which applies at once because it's stricter than a tool. | v0.1 |
 | R60 | A browser tab (a Custom Tab, an Auth Tab or Firefox's equivalent) that an app open right now starts for a sign-in, payment or help page rides on that app's visit and isn't judged on its own. | v0.1 |
+| R61 | Adult content and gambling are blocked everywhere, always, with no pass. Covenant sets Android's Private DNS to an adult filter (one tap with the secure-settings permission, or guided by hand), and matches gambling and betting domains from a bundled list in the address bar. Turning either off is looser and waits the cooldown; if Private DNS is changed, home shows Unguarded. | v0.1 |
+| R62 | Your own list: any domain, blocked always or outside chosen blocks. Adding is instant; removing waits the cooldown. | v0.1 |
 
 ## Gaps
 
@@ -262,7 +264,7 @@ Every hole found while planning has a rule, a test or a known limit. Safe mode a
 | Payments can't wait for a block | Setup suggests your UPI apps as essentials. Payment apps can flag any accessibility app installed outside Play as a risk, so Paytm, Navi and slice are tested before anything else (spike 1), and again from a Play install |
 | Keyboard, permission dialogs, share sheet, pickers and sign-in | On the system allowlist, so never blocked |
 | WhatsApp or Telegram calls outside their block | Ring-through list (R20) |
-| Opening a blocked app's website instead | Websites follow apps (R9, R10) from v0.3. Until then any allowed browser opens every blocked site: accepted |
+| Opening a blocked app's website instead | Websites follow apps (R9), read from the address bar. In-app browsers stay a known limit |
 | In-app browsers (Instagram, Gmail, Telegram, the Google app) | Known limit: they never follow R9 |
 | Hand-offs from essentials (Camera to Photos, a bank's card check, a sign-in page) | Photos is a tool unless you mark it, and browser tabs ride on the app that opened them (R60) |
 | Installing a new app as a loophole | A new app asks once: tool or temptation (R59). Calling a feed a tool is a choice you make deliberately |
